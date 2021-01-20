@@ -80,7 +80,7 @@ function initGame() {
 
 function renderContent() {
     console.log(gSmileyState)
-    randomizeMines()
+    if (!gIsGodMode) randomizeMines()
     renderBoard()
     // randomizeMines()
     renderLives()
@@ -638,24 +638,6 @@ function renderAvailableClicks() {
 }
 
 
-
-
-//duplicate demo
-// function expandAround(pos) {
-
-//     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
-//         if (i < 0 || i > gBoard.length - 1) continue
-//         for (var j = pos.j - 1; j <= pos.j + 1; j++) {
-//             if (j < 0 || j > gBoard[0].length - 1) continue
-//             if (i === pos.i && j === pos.j) continue
-//             var currCell = gBoard[i][j]
-//             currCell.isShown = true
-//         }
-//     }
-// }
-
-
-
 /**
  * 
  * If we enter to this mode:
@@ -666,6 +648,10 @@ function renderAvailableClicks() {
  * add button - set mines, when clicked:
  * call/create(?) [createMines()] func, set the mines based on array items
  * exit god mode, render(how to not render the regulat random mines?) and play
+ * 
+ * 
+ * 
+ * TODO: It's working, what's left - consider 
  * 
  * **/
 function onGodModeClicked() {
@@ -698,5 +684,23 @@ function exitGodMode() {
 }
 
 function playYourCreation() {
-    alert("Even for god it took 7 days...")
+    // alert("Even for god it took 7 days...")
+    createMines()
+}
+
+function createMines() {
+    console.log("creating mines...", gGodModeMines)
+
+    for (var i = 0; i < gGodModeMines.length; i++) {
+        console.log(gGodModeMines[i])
+        var cell = gBoard[gGodModeMines[i].i][gGodModeMines[i].j]
+        cell.isMine = true
+    }
+
+    //TODO: Extract to function
+    renderBoard()
+    setMinesNegsCount()
+    gLevel.mines = gGodModeMines.length
+    gIsGodMode = false
+    document.querySelector(".godmode-message").classList.add("hide")
 }
