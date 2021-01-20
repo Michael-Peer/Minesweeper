@@ -41,12 +41,14 @@ var gIsFirstClick
 var gUserLives
 var gUserHints
 var gSmileyState
+var gIsOn
 
 
 //when page loads
 function initGame() {
     gBoard = buildBoard()
     gIsFirstClick = true
+    gIsOn = true
     gUserLives = 3
     gUserHints = 3
     gSmileyState = SmileyState.Normal
@@ -186,6 +188,7 @@ function countNegs(pos) {
 // Called when a cell (td) is
 // clicked
 function onCellClicked(elCell, i, j, e) {
+    if(!gIsOn) return
 
 
     var cell = gBoard[i][j]
@@ -236,6 +239,7 @@ function renderMessage(isWin) {
     renderSmiley()
     var elBoard = document.querySelector('body');
     elBoard.innerHTML += `<p>${isWin ? "YOU WON" : "YOU LOST"}</p>`
+    gIsOn = false
 }
 
 function revealAllMines() {
@@ -264,6 +268,7 @@ function revealMine() {
 // implement) how to hide the
 // context menu on right click
 function onCellMarked(elCell, i, j, e) {
+    if(!gIsOn) return
     console.log("adssadsad")
     e.preventDefault()
     var cell = gBoard[i][j]
