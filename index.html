@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="initGame()">
+
+    <table border="1" cellpadding="16">
+        <tbody class="board">
+
+        </tbody>
+    </table>
+    <button onclick="onLevelClicked(4)">Beginner</button>
+    <button  onclick="onLevelClicked(8)">Medium</button>
+    <button  onclick="onLevelClicked(12)">Expert</button>
+    <p class="smiley" onclick="initGame()"></p>
+    <p class="lives"></p>
+    <p onclick="onHintClicked()" class="hints"></p>
+
+
+
+    <script src="./utils.js"></script>
+    <script src="./index.js"></script>
+</body>
+
+</html>
