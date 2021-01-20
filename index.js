@@ -385,7 +385,8 @@ function renderLives() {
 function renderSmiley() {
 
     var elSmiley = document.querySelector('.smiley');
-    elSmiley.innerHTML = `<p>${gSmileyState}</p>`
+    elSmiley.innerText = `${gSmileyState}`
+
 }
 
 function renderHints() {
