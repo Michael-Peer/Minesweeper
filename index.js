@@ -456,14 +456,14 @@ function renderLives() {
     var lives = ""
     switch (gUserLives) {
         case 3:
-            lives = " * * * "
+            lives = " 💖 💖 💖 "
             break;
         case 2:
-            lives = " * * "
+            lives = " 💖 💖 "
 
             break;
         case 1:
-            lives = " * "
+            lives = " 💖 "
             break;
         default:
             break;
@@ -481,14 +481,14 @@ function renderHints() {
     var hints = ""
     switch (gUserHints) {
         case 3:
-            hints = " % % % "
+            hints = " 💡 💡 💡 "
             break;
         case 2:
-            hints = " % % "
+            hints = " 💡 💡 "
 
             break;
         case 1:
-            hints = " % "
+            hints = " 💡 "
             break;
         default:
             break;
