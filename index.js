@@ -45,7 +45,8 @@ var gIsOn
 var gIsHintClicked
 var gSecs
 var gTimerInterval
-var gSageButtonClicks
+var gSafeButtonClicks
+var gIsSafeButtonClicked
 
 
 //when page loads
@@ -57,7 +58,8 @@ function initGame() {
     gUserLives = 3
     gUserHints = 3
     gSecs = 0
-    gSageButtonClicks = 3
+    gSafeButtonClicks = 3
+    gIsSafeButtonClicked = false
     gSmileyState = SmileyState.Normal
     console.log(gSmileyState)
     randomizeMines()
@@ -165,6 +167,9 @@ function renderBoard(board) {
 
 
 
+
+
+
 // Count mines around each cell
 // and set the cell's
 // minesAroundCount.
@@ -186,9 +191,9 @@ function setMinesNegsCount(board) {
     }
 
     renderBoard()
-
-
 }
+
+
 
 function countNegs(pos) {
     var count = 0
@@ -250,6 +255,7 @@ function onCellClicked(elCell, i, j, e) {
 
     renderBoard()
     checkGameOver()
+
 }
 
 
@@ -542,20 +548,38 @@ function setBestScore() {
 // (for a few seconds) that is safe to click (does not contain a
 // MINE).
 function onSafeButtonClicked() {
-
+    console.log("hereweew")
+    if(!gSafeButtonClicks || gIsSafeButtonClicked) return
+    gIsSafeButtonClicked = true
+    var elCell = null
     var rndI = getRandomInt(0, gLevel.size)
     var rngJ = getRandomInt(0, gLevel.size)
-    if(!gBoard[rndI][rngJ].isMine) {
+    if (!gBoard[rndI][rngJ].isMine) {
         console.log(gBoard[rndI][rngJ], "safe click")
-        var elCell = document.getElementById(`${rndI},${rngJ}`)
+        elCell = document.getElementById(`${rndI},${rngJ}`)
         elCell.classList.add("safe")
-    } 
+    }
+    if(!elCell) return
+    gSafeButtonClicks--
+    renderAvailableClicks()
+    setTimeout(() => {
+        elCell.classList.remove("safe")
+        gIsSafeButtonClicked = false
+    }, 5000);
+
+}
+
+function renderAvailableClicks() {
+    var elSafeButtonTxt = document.querySelector(".safe-button-text")
+    elSafeButtonTxt.innerText= `${gSafeButtonClicks} clicks available`
 }
 
 
 
-// //duplicate demo
+
+//duplicate demo
 // function expandAround(pos) {
+
 //     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
 //         if (i < 0 || i > gBoard.length - 1) continue
 //         for (var j = pos.j - 1; j <= pos.j + 1; j++) {
