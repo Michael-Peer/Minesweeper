@@ -42,12 +42,14 @@ var gUserLives
 var gUserHints
 var gSmileyState
 var gIsOn
+var gIsHintClicked
 
 
 //when page loads
 function initGame() {
     gBoard = buildBoard()
     gIsFirstClick = true
+    gIsHintClicked = false
     gIsOn = true
     gUserLives = 3
     gUserHints = 3
@@ -188,16 +190,22 @@ function countNegs(pos) {
 // Called when a cell (td) is
 // clicked
 function onCellClicked(elCell, i, j, e) {
-    if(!gIsOn) return
+
+    if (!gIsOn) return
 
 
     var cell = gBoard[i][j]
+
+    if (gIsHintClicked) {
+        console.log("gIsHintClicked")
+        revealNgs({i,j})
+        return
+    } 
 
     if (gIsFirstClick) {
         gIsFirstClick = false
         if (cell.isMine) changeMineLocation(elCell, i, j)
     }
-
 
     if (cell.isMarked || cell.isShown) return //prevent click on cells
 
@@ -268,7 +276,7 @@ function revealMine() {
 // implement) how to hide the
 // context menu on right click
 function onCellMarked(elCell, i, j, e) {
-    if(!gIsOn) return
+    if (!gIsOn) return
     console.log("adssadsad")
     e.preventDefault()
     var cell = gBoard[i][j]
@@ -429,6 +437,33 @@ function onHintClicked() {
      * then onCell click I check if hintClicked
      * basd on that I call exapndAroung, and  should probably set timeout to currCell.isShown = false
      * **/
+    gIsHintClicked = true
+
+}
+
+function revealNgs(pos) {
+    var ngs = []
+    for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+        if (i < 0 || i > gBoard.length - 1) continue
+        for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+            if (j < 0 || j > gBoard[0].length - 1) continue
+            if (i === pos.i && j === pos.j) continue
+            var currCell = gBoard[i][j]
+            currCell.isShown = true
+            ngs.push(currCell)
+        }
+    }
+
+    renderBoard()
+    setTimeout(() => {
+        for (var i = 0; i < ngs.length; i++) {
+            ngs[i].isShown = false
+        }
+        renderBoard()
+        gIsHintClicked = false
+        gUserHints--
+        renderHints()
+    }, 1000);
 }
 
 //duplicate demo
