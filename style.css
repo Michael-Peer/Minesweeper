@@ -1,3 +1,11 @@
 .safe {
     background-color: lightblue;
 }
+.god-mode-text{
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.hide {
+    display: none;
+}

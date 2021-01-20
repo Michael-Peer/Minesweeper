@@ -12,6 +12,8 @@
 <body onload="initGame()">
 <p class="message"></p>
 <p class="hint-message"></p>
+<div class="godmode-message"></div>
+
     <table border="1" cellpadding="16">
         <tbody class="board">
 
@@ -27,7 +29,7 @@
     <p class="best-score">It's your first time! play to set the best score</p>
     <button onclick="onSafeButtonClicked()" class="safe-button">Safe Button</button>
     <p class="safe-button-text">3 clicks available</p>
-    <button class="create-manual">GOD MODE</button>
+    <button class="god-mode" onclick="onGodModeClicked()">GOD MODE</button>
 
 
 

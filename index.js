@@ -48,6 +48,8 @@ var gIsSafeButtonClicked
 
 var gIsGodMode = false
 
+var gGodModeMines = []
+
 
 //when page loads
 function initGame() {
@@ -64,10 +66,13 @@ function initGame() {
 
     gSmileyState = SmileyState.Normal
 
+    gGodModeMines = []
+
     gGame.isOn = true,
         gGame.shownCount = 0,
         gGame.markedCount = 0,
         gGame.secsPassed = 0
+
 
     renderContent()
 
@@ -230,6 +235,10 @@ function countNegs(pos) {
 function onCellClicked(elCell, i, j, e) {
 
     if (!gGame.isOn) return
+    if (gIsGodMode) {
+        createMine(i, j)
+        return
+    }
 
 
     var cell = gBoard[i][j]
@@ -307,7 +316,7 @@ function revealAllMines() {
     renderBoard() //TODO: Reduce unnecessary rendering
 }
 
-//only reveal mine when live > 0
+//only reveal mine when live > 0 - X
 function revealMine() {
     // gBoard[i][j].isShown = true
 }
@@ -352,7 +361,7 @@ function checkGameOver() {
             var cell = gBoard[i][j]
             /**
              * 
-             * here we handle the "regular" case where mines are flagged AND the case where mine revealed by losing life.
+             * here we're handling the "regular" case where mines are flagged AND the case where mine revealed by losing life.
              * 
              * **/
             if (cell.isMine && (cell.isMarked || cell.isShown)) mines--
@@ -360,7 +369,6 @@ function checkGameOver() {
         }
     }
     console.log(cellCnt, mines)
-    //TODO: prevent clicks after  message rendered.
     if (!cellCnt && !mines) renderMessage(true)
 }
 
@@ -540,7 +548,7 @@ function startTimer() {
 function restartGame() {
     console.log("restartGame")
     clearInterval(gTimerInterval)
-    gIsGodMode = false
+    // gIsGodMode = false
     initGame()
     renderStartingSecs()
     document.querySelector(".message").innerText = ""
@@ -648,4 +656,42 @@ function renderAvailableClicks() {
 
 
 
+/**
+ * 
+ * If we enter to this mode:
+ * check in [onCellClicked()] if we're in god mode, if we are:
+ * go outside from the regular flow
+ * create [setMines()] function, save the mines and the position in array(?)
+ * keep adding to the array while we're in god moe AND user click on cells
+ * add button - set mines, when clicked:
+ * call/create(?) [createMines()] func, set the mines based on array items
+ * exit god mode, render(how to not render the regulat random mines?) and play
+ * 
+ * **/
+function onGodModeClicked() {
+    var strHTML = ""
+    console.log("here")
+    gIsGodMode = true
+    restartGame()//TODO: check if godMode when we call randomizeMines()
+    var elGodMose = document.querySelector(".godmode-message")
 
+    strHTML += `<p class="god-mode-text" >You're in god mode</p>`
+    strHTML += `<button onclick="exitGodMode()">EXIT</button>`
+    elGodMose.innerHTML = strHTML
+}
+
+function createMine(i, j) {
+    console.log("creating...", { i, j })
+
+    var elCell = document.getElementById(`${i},${j}`)
+    elCell.innerText = MINE
+    gGodModeMines.push({ i, j })
+
+    console.log(gGodModeMines)
+}
+
+function exitGodMode() {
+    gIsGodMode = false
+    document.querySelector(".godmode-message").classList.add("hide")
+    restartGame()
+}
