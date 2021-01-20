@@ -68,6 +68,7 @@ function initGame() {
     renderLives()
     renderSmiley()
     renderHints()
+    renderAvailableClicks()
     setBestScore()
     setMinesNegsCount()
 }
@@ -550,18 +551,34 @@ function setBestScore() {
 function onSafeButtonClicked() {
     console.log("hereweew")
     if(!gSafeButtonClicks || gIsSafeButtonClicked) return
+
+    const availableCells = []
+
     gIsSafeButtonClicked = true
+    
     var elCell = null
     var rndI = getRandomInt(0, gLevel.size)
     var rngJ = getRandomInt(0, gLevel.size)
-    if (!gBoard[rndI][rngJ].isMine) {
-        console.log(gBoard[rndI][rngJ], "safe click")
+    var cell = gBoard[rndI][rngJ]
+
+    for (var i = 0; i < gLevel.size; i++) {
+        for (var j = 0; j < gLevel.size; j++) {
+            if (!cell.isMine && !cell.isShown && !cell.isMarked) {
+                availableCells.push({pos:{i,j}})
+            }
+        }
+    }
+
+    if(!availableCells.length) return
+    var cell = availableCells[getRandomInt(0, availableCells.length)]
+
+        console.log(gBoard[cell.pos.i][cell.pos.j], "safe click")
         elCell = document.getElementById(`${rndI},${rngJ}`)
         elCell.classList.add("safe")
-    }
-    if(!elCell) return
+
     gSafeButtonClicks--
     renderAvailableClicks()
+
     setTimeout(() => {
         elCell.classList.remove("safe")
         gIsSafeButtonClicked = false
