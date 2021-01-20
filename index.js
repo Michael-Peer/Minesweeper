@@ -45,6 +45,7 @@ var gIsOn
 var gIsHintClicked
 var gSecs
 var gTimerInterval
+var gSageButtonClicks
 
 
 //when page loads
@@ -56,6 +57,7 @@ function initGame() {
     gUserLives = 3
     gUserHints = 3
     gSecs = 0
+    gSageButtonClicks = 3
     gSmileyState = SmileyState.Normal
     console.log(gSmileyState)
     randomizeMines()
@@ -71,7 +73,20 @@ function initGame() {
 //random mines location on board
 function randomizeMines() {
     for (var i = 0; i < gLevel.mines; i++) {
-        var cell = gBoard[getRandomInt(0, gLevel.size)][getRandomInt(0, gLevel.size)]
+        var rndI = getRandomInt(0, gLevel.size)
+        var rngJ = getRandomInt(0, gLevel.size)
+        console.log("before")
+
+        //if they're equal
+        while (rndI === rngJ) {
+            rndI = getRandomInt(0, gLevel.size)
+            rngJ = getRandomInt(0, gLevel.size)
+            console.log("in while")
+        }
+
+        console.log("after")
+
+        var cell = gBoard[rndI][rngJ]
         cell.isMine = true
     }
 }
@@ -129,15 +144,15 @@ function renderBoard(board) {
             //TODO: Convert to switch? or more efficent approach
             //TODO: Pass data instead of ${i, j} - save code
             if (cell.isMine && cell.isMarked) {
-                strHTML += `<td mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${FLAG}</td>`
+                strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${FLAG}</td>`
             }
             else if (cell.isMine) {
-                strHTML += `<td mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? "#" : ""}</td>`
+                strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? "#" : ""}</td>`
             }
             else if (cell.isMarked) {
-                strHTML += `<td onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
+                strHTML += `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
             } else {
-                strHTML += `<td onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.isShown ? cell.minesAroundCount : ""}</td>`
+                strHTML += `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.isShown ? cell.minesAroundCount : ""}</td>`
             }
         }
         strHTML += `</tr>`
@@ -503,11 +518,11 @@ function renderStartingSecs() {
 //local storage
 function storeScore() {
     var bestScore = localStorage.getItem("bestScore") // null if empty
-    if(!bestScore || gSecs < bestScore) {
-        localStorage.setItem("bestScore", `${gSecs}`) 
+    if (!bestScore || gSecs < bestScore) {
+        localStorage.setItem("bestScore", `${gSecs}`)
         renderBestScore(gSecs)
 
-    } 
+    }
 }
 
 
@@ -519,7 +534,22 @@ function renderBestScore(score) {
 
 function setBestScore() {
     var bestScore = localStorage.getItem("bestScore") // null if empty
-    if(bestScore) renderBestScore(bestScore)
+    if (bestScore) renderBestScore(bestScore)
+}
+
+
+// Clicking the Safe-Click button will mark a random covered cell
+// (for a few seconds) that is safe to click (does not contain a
+// MINE).
+function onSafeButtonClicked() {
+
+    var rndI = getRandomInt(0, gLevel.size)
+    var rngJ = getRandomInt(0, gLevel.size)
+    if(!gBoard[rndI][rngJ].isMine) {
+        console.log(gBoard[rndI][rngJ], "safe click")
+        var elCell = document.getElementById(`${rndI},${rngJ}`)
+        elCell.classList.add("safe")
+    } 
 }
 
 
@@ -536,3 +566,7 @@ function setBestScore() {
 //         }
 //     }
 // }
+
+
+
+
