@@ -674,9 +674,9 @@ function onGodModeClicked() {
     gIsGodMode = true
     restartGame()//TODO: check if godMode when we call randomizeMines()
     var elGodMose = document.querySelector(".godmode-message")
-
     strHTML += `<p class="god-mode-text" >You're in god mode</p>`
     strHTML += `<button onclick="exitGodMode()">EXIT</button>`
+    elGodMose.classList.remove("hide")
     elGodMose.innerHTML = strHTML
 }
 
