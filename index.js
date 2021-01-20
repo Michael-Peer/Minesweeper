@@ -237,6 +237,7 @@ function onCellClicked(elCell, i, j, e) {
     if (gIsHintClicked) {
         console.log("gIsHintClicked")
         revealNgs({ i, j })
+        renderHintMessage(false)
         return
     }
 
@@ -417,7 +418,7 @@ function onLevelClicked(size) {
             break;
 
         default:
-            console.log("Well, you have big problem if you are here")
+            console.log("Well, you have big problem if you ended up here")
             break;
     }
 }
@@ -449,10 +450,8 @@ function renderLives() {
 }
 
 function renderSmiley() {
-
     var elSmiley = document.querySelector('.smiley');
     elSmiley.innerText = `${gSmileyState}`
-
 }
 
 function renderHints() {
@@ -489,10 +488,17 @@ function onHintClicked() {
      * when hint click I need to save hintClciked = true
      * then onCell click I check if hintClicked
      * basd on that I call exapndAroung, and  should probably set timeout to currCell.isShown = false
+     * 
+     * 
+     * Logic is done
      * **/
     if (!gUserHints) return
     gIsHintClicked = true
+    renderHintMessage(true)
+}
 
+function renderHintMessage(isHintMode) {
+    document.querySelector(".hint-message").innerText = `${isHintMode ? "Hint mode is active" : ""} `
 }
 
 function revealNgs(pos) {
@@ -523,9 +529,6 @@ function revealNgs(pos) {
 }
 
 
-
-
-
 function startTimer() {
     var elTimer = document.querySelector(".timer")
     gGame.secsPassed++
@@ -540,6 +543,7 @@ function restartGame() {
     gIsGodMode = false
     initGame()
     renderStartingSecs()
+    document.querySelector(".message").innerText = ""
 }
 
 function renderStartingSecs() {
@@ -575,7 +579,7 @@ function setBestScore() {
 // (for a few seconds) that is safe to click (does not contain a
 // MINE).
 function onSafeButtonClicked() {
-    
+
     if (!gSafeButtonClicks || gIsSafeButtonClicked) return //no clicka or already active
     console.log("hereweew")
 
@@ -588,7 +592,7 @@ function onSafeButtonClicked() {
     // var rngJ = getRandomInt(0, gLevel.size)
     // var cell = gBoard[rndI][rngJ]
 
-    //for complete random cell
+    //for completely random cell
     for (var i = 0; i < gLevel.size; i++) {
         for (var j = 0; j < gLevel.size; j++) {
             var cell = gBoard[i][j]
@@ -598,10 +602,12 @@ function onSafeButtonClicked() {
         }
     }
 
+    //no cells
     if (!availableCells.length) {
         gIsSafeButtonClicked = false
         return
     }
+
     var cell = availableCells[getRandomInt(0, availableCells.length)]
 
     console.log(gBoard[cell.pos.i][cell.pos.j], "safe click")
