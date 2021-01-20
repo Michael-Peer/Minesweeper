@@ -51,19 +51,29 @@ var gIsGodMode = false
 
 //when page loads
 function initGame() {
+
     gBoard = buildBoard()
+
     gIsFirstClick = true
     gIsHintClicked = false
+    gIsSafeButtonClicked = false
+
     gUserLives = 3
     gUserHints = 3
     gSafeButtonClicks = 3
-    gIsSafeButtonClicked = false
+
     gSmileyState = SmileyState.Normal
 
     gGame.isOn = true,
         gGame.shownCount = 0,
         gGame.markedCount = 0,
         gGame.secsPassed = 0
+
+    renderContent()
+
+}
+
+function renderContent() {
     console.log(gSmileyState)
     randomizeMines()
     renderBoard()
@@ -257,7 +267,7 @@ function onCellClicked(elCell, i, j, e) {
 
     if (!cell.minesAroundCount && !cell.isMine) expandShown(gBoard, elCell, i, j)
 
-    renderBoard()
+    renderBoard() //TODO: Reduce unnecessary rendering use innerText/html instead
     checkGameOver()
 
 }
@@ -565,7 +575,8 @@ function setBestScore() {
 // (for a few seconds) that is safe to click (does not contain a
 // MINE).
 function onSafeButtonClicked() {
-    if (!gSafeButtonClicks || gIsSafeButtonClicked) return
+    
+    if (!gSafeButtonClicks || gIsSafeButtonClicked) return //no clicka or already active
     console.log("hereweew")
 
     const availableCells = []
@@ -573,12 +584,14 @@ function onSafeButtonClicked() {
     gIsSafeButtonClicked = true
 
     var elCell = null
-    var rndI = getRandomInt(0, gLevel.size)
-    var rngJ = getRandomInt(0, gLevel.size)
-    var cell = gBoard[rndI][rngJ]
+    // var rndI = getRandomInt(0, gLevel.size)
+    // var rngJ = getRandomInt(0, gLevel.size)
+    // var cell = gBoard[rndI][rngJ]
 
+    //for complete random cell
     for (var i = 0; i < gLevel.size; i++) {
         for (var j = 0; j < gLevel.size; j++) {
+            var cell = gBoard[i][j]
             if (!cell.isMine && !cell.isShown && !cell.isMarked) {
                 availableCells.push({ pos: { i, j } })
             }
@@ -592,7 +605,7 @@ function onSafeButtonClicked() {
     var cell = availableCells[getRandomInt(0, availableCells.length)]
 
     console.log(gBoard[cell.pos.i][cell.pos.j], "safe click")
-    elCell = document.getElementById(`${rndI},${rngJ}`)
+    elCell = document.getElementById(`${cell.pos.i},${cell.pos.j}`)
     elCell.classList.add("safe")
 
     gSafeButtonClicks--
