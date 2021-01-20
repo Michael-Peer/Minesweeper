@@ -114,16 +114,27 @@ function renderContent() {
 
 //random mines location on board
 function randomizeMines() {
+    var prevI
+    var prevJ
+    var isFirstTimeRuning = true
     for (var i = 0; i < gLevel.mines; i++) {
         var rndI = getRandomInt(0, gLevel.size)
         var rngJ = getRandomInt(0, gLevel.size)
         console.log("before")
 
-        //if they're equal
-        while (rndI === rngJ) {
-            rndI = getRandomInt(0, gLevel.size)
-            rngJ = getRandomInt(0, gLevel.size)
-            console.log("in while")
+        //prevent 2 mines on same spot
+        if (!isFirstTimeRuning) {
+            while (rndI === prevI && rngJ == prevJ) {
+                rndI = getRandomInt(0, gLevel.size)
+                rngJ = getRandomInt(0, gLevel.size)
+                console.log("in while")
+            }
+            prevI = rndI
+            prevJ = rngJ
+        } else {
+            isFirstTimeRuning = false
+            prevI = rndI
+            prevJ = rngJ
         }
 
         console.log("after")
