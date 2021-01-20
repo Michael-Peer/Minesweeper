@@ -339,6 +339,11 @@ function checkGameOver() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
             var cell = gBoard[i][j]
+            /**
+             * 
+             * here we handle the "regular" case where mines are flagged AND the case where mine revealed by losing life.
+             * 
+             * **/
             if (cell.isMine && (cell.isMarked || cell.isShown)) mines--
             else if (cell.isShown && !cell.isMine) cellCnt--
         }
@@ -560,8 +565,8 @@ function setBestScore() {
 // (for a few seconds) that is safe to click (does not contain a
 // MINE).
 function onSafeButtonClicked() {
-    console.log("hereweew")
     if (!gSafeButtonClicks || gIsSafeButtonClicked) return
+    console.log("hereweew")
 
     const availableCells = []
 
@@ -580,7 +585,10 @@ function onSafeButtonClicked() {
         }
     }
 
-    if (!availableCells.length) return
+    if (!availableCells.length) {
+        gIsSafeButtonClicked = false
+        return
+    }
     var cell = availableCells[getRandomInt(0, availableCells.length)]
 
     console.log(gBoard[cell.pos.i][cell.pos.j], "safe click")
