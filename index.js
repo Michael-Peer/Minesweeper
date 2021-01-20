@@ -64,6 +64,7 @@ function initGame() {
     renderLives()
     renderSmiley()
     renderHints()
+    setBestScore()
     setMinesNegsCount()
 }
 
@@ -501,7 +502,24 @@ function renderStartingSecs() {
 
 //local storage
 function storeScore() {
+    var bestScore = localStorage.getItem("bestScore") // null if empty
+    if(!bestScore || gSecs < bestScore) {
+        localStorage.setItem("bestScore", `${gSecs}`) 
+        renderBestScore(gSecs)
 
+    } 
+}
+
+
+//TODO: Render best score based on size
+function renderBestScore(score) {
+    var elBestScore = document.querySelector(".best-score")
+    elBestScore.innerText = `Best score is: ${score}`
+}
+
+function setBestScore() {
+    var bestScore = localStorage.getItem("bestScore") // null if empty
+    if(bestScore) renderBestScore(bestScore)
 }
 
 
