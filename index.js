@@ -41,12 +41,12 @@ var gIsFirstClick
 var gUserLives
 var gUserHints
 var gSmileyState
-var gIsOn
 var gIsHintClicked
-var gSecs
 var gTimerInterval
 var gSafeButtonClicks
 var gIsSafeButtonClicked
+
+var gIsGodMode = false
 
 
 //when page loads
@@ -54,13 +54,16 @@ function initGame() {
     gBoard = buildBoard()
     gIsFirstClick = true
     gIsHintClicked = false
-    gIsOn = true
     gUserLives = 3
     gUserHints = 3
-    gSecs = 0
     gSafeButtonClicks = 3
     gIsSafeButtonClicked = false
     gSmileyState = SmileyState.Normal
+
+    gGame.isOn = true,
+        gGame.shownCount = 0,
+        gGame.markedCount = 0,
+        gGame.secsPassed = 0
     console.log(gSmileyState)
     randomizeMines()
     renderBoard()
@@ -216,7 +219,7 @@ function countNegs(pos) {
 // clicked
 function onCellClicked(elCell, i, j, e) {
 
-    if (!gIsOn) return
+    if (!gGame.isOn) return
 
 
     var cell = gBoard[i][j]
@@ -242,7 +245,7 @@ function onCellClicked(elCell, i, j, e) {
     } else if (cell.isMine && gUserLives) {
         gUserLives--
         !gUserLives ? onMineClicked() : renderLives()
-
+        // renderWarning(i,j)
     }
 
     //psuedo code 
@@ -259,7 +262,6 @@ function onCellClicked(elCell, i, j, e) {
 
 }
 
-
 function onMineClicked() {
     // if (!gUserLives) {
     //     revealMine(i, j)
@@ -273,9 +275,9 @@ function onMineClicked() {
 function renderMessage(isWin) {
     gSmileyState = isWin ? SmileyState.Win : SmileyState.Lose
     renderSmiley()
-    var elBoard = document.querySelector('body');
-    elBoard.innerHTML += `<p>${isWin ? "YOU WON" : "YOU LOST"}</p>`
-    gIsOn = false
+    var elBoard = document.querySelector('.message');
+    elBoard.innerHTML = `<p>${isWin ? `YOU WON with ${gUserLives} ${gUserLives > 1 ? "lives" : "life"} left` : "YOU LOST"}</p>`
+    gGame.isOn = false
     clearInterval(gTimerInterval)
     storeScore()
 }
@@ -306,12 +308,19 @@ function revealMine() {
 // implement) how to hide the
 // context menu on right click
 function onCellMarked(elCell, i, j, e) {
-    if (!gIsOn) return
-    console.log("adssadsad")
+    if (!gGame.isOn) return
     e.preventDefault()
     var cell = gBoard[i][j]
+    console.log(cell.isShown)
     if (cell.isShown) return //prevent click on cells
-    cell.isMarked = true
+    if (cell.isMarked) {
+        cell.isMarked = !cell.isMarked
+        gGame.markedCount--
+    } else {
+        cell.isMarked = true
+        gGame.markedCount++
+    }
+    console.log("adssadsad")
     checkGameOver() // case where we reveal all the non-mines cells but we didn't marked the mines yet
     renderBoard()
 }
@@ -323,15 +332,14 @@ function onCellMarked(elCell, i, j, e) {
 // marked, and all the other cells
 // are shown
 function checkGameOver() {
-    var mines = 2 //will come from gGame.minesCount later
-    var cellCnt = gBoard.length * gBoard.length - mines  //same
-    // console.log(cellCnt)
-    // var markedCells = 0
+    var mines = gLevel.mines
+    var cellCnt = gBoard.length * gBoard.length - mines
+
 
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
             var cell = gBoard[i][j]
-            if ((cell.isMine && cell.isMarked) || (cell.isMine && cell.isShown)) mines--
+            if (cell.isMine && (cell.isMarked || cell.isShown)) mines--
             else if (cell.isShown && !cell.isMine) cellCnt--
         }
     }
@@ -369,7 +377,7 @@ function expandAround(pos) {
             if (j < 0 || j > gBoard[0].length - 1) continue
             if (i === pos.i && j === pos.j) continue
             var currCell = gBoard[i][j]
-            currCell.isShown = true
+            if (!currCell.isMarked) currCell.isShown = true
         }
     }
 }
@@ -380,17 +388,17 @@ function onLevelClicked(size) {
         case 4:
             gLevel.size = size
             gLevel.mines = 2
-            initGame()
+            restartGame()
             break;
         case 8:
             gLevel.size = size
             gLevel.mines = 8
-            initGame()
+            restartGame()
             break;
         case 12:
             gLevel.size = size
             gLevel.mines = 12
-            initGame()
+            restartGame()
             break;
 
         default:
@@ -480,8 +488,10 @@ function revealNgs(pos) {
             if (j < 0 || j > gBoard[0].length - 1) continue
             if (i === pos.i && j === pos.j) continue
             var currCell = gBoard[i][j]
-            currCell.isShown = true
-            ngs.push(currCell)
+            if (!currCell.isMarked) {
+                currCell.isShown = true
+                ngs.push(currCell)
+            }
         }
     }
 
@@ -503,8 +513,8 @@ function revealNgs(pos) {
 
 function startTimer() {
     var elTimer = document.querySelector(".timer")
-    gSecs++
-    elTimer.innerText = gSecs
+    gGame.secsPassed++
+    elTimer.innerText = gGame.secsPassed
 
 }
 
@@ -512,6 +522,7 @@ function startTimer() {
 function restartGame() {
     console.log("restartGame")
     clearInterval(gTimerInterval)
+    gIsGodMode = false
     initGame()
     renderStartingSecs()
 }
@@ -525,9 +536,9 @@ function renderStartingSecs() {
 //local storage
 function storeScore() {
     var bestScore = localStorage.getItem("bestScore") // null if empty
-    if (!bestScore || gSecs < bestScore) {
-        localStorage.setItem("bestScore", `${gSecs}`)
-        renderBestScore(gSecs)
+    if (!bestScore || gGame.secsPassed < bestScore) {
+        localStorage.setItem("bestScore", `${gGame.secsPassed}`)
+        renderBestScore(gGame.secsPassed)
 
     }
 }
@@ -550,12 +561,12 @@ function setBestScore() {
 // MINE).
 function onSafeButtonClicked() {
     console.log("hereweew")
-    if(!gSafeButtonClicks || gIsSafeButtonClicked) return
+    if (!gSafeButtonClicks || gIsSafeButtonClicked) return
 
     const availableCells = []
 
     gIsSafeButtonClicked = true
-    
+
     var elCell = null
     var rndI = getRandomInt(0, gLevel.size)
     var rngJ = getRandomInt(0, gLevel.size)
@@ -564,17 +575,17 @@ function onSafeButtonClicked() {
     for (var i = 0; i < gLevel.size; i++) {
         for (var j = 0; j < gLevel.size; j++) {
             if (!cell.isMine && !cell.isShown && !cell.isMarked) {
-                availableCells.push({pos:{i,j}})
+                availableCells.push({ pos: { i, j } })
             }
         }
     }
 
-    if(!availableCells.length) return
+    if (!availableCells.length) return
     var cell = availableCells[getRandomInt(0, availableCells.length)]
 
-        console.log(gBoard[cell.pos.i][cell.pos.j], "safe click")
-        elCell = document.getElementById(`${rndI},${rngJ}`)
-        elCell.classList.add("safe")
+    console.log(gBoard[cell.pos.i][cell.pos.j], "safe click")
+    elCell = document.getElementById(`${rndI},${rngJ}`)
+    elCell.classList.add("safe")
 
     gSafeButtonClicks--
     renderAvailableClicks()
@@ -588,7 +599,7 @@ function onSafeButtonClicked() {
 
 function renderAvailableClicks() {
     var elSafeButtonTxt = document.querySelector(".safe-button-text")
-    elSafeButtonTxt.innerText= `${gSafeButtonClicks} clicks available`
+    elSafeButtonTxt.innerText = `${gSafeButtonClicks} clicks available`
 }
 
 
