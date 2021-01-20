@@ -9,3 +9,7 @@
 .hide {
     display: none;
 }
+
+.small-m-l {
+    margin-left: 5px;
+}

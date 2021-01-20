@@ -676,6 +676,7 @@ function onGodModeClicked() {
     var elGodMose = document.querySelector(".godmode-message")
     strHTML += `<p class="god-mode-text" >You're in god mode</p>`
     strHTML += `<button onclick="exitGodMode()">EXIT</button>`
+    strHTML += `<button class="small-m-l" onclick="playYourCreation()">play with your creation</button>`
     elGodMose.classList.remove("hide")
     elGodMose.innerHTML = strHTML
 }
@@ -694,4 +695,8 @@ function exitGodMode() {
     gIsGodMode = false
     document.querySelector(".godmode-message").classList.add("hide")
     restartGame()
+}
+
+function playYourCreation() {
+    alert("Even for god it took 7 days...")
 }
