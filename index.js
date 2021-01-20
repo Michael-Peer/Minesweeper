@@ -379,7 +379,7 @@ function renderLives() {
             break;
     }
     var elLives = document.querySelector('.lives');
-    elLives.innerHTML = `<p>${lives}</p>`
+    elLives.innerHTML = `<p>${lives} lives</p>`
 }
 
 function renderSmiley() {
@@ -405,7 +405,7 @@ function renderHints() {
             break;
     }
     var elHints = document.querySelector('.hints');
-    elHints.innerHTML = `<p>${hints}</p>`
+    elHints.innerHTML = `<p>${hints} hints</p>`
 }
 
 function onHintClicked() {
