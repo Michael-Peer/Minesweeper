@@ -43,6 +43,8 @@ var gUserHints
 var gSmileyState
 var gIsOn
 var gIsHintClicked
+var gSecs
+var gTimerInterval
 
 
 //when page loads
@@ -53,6 +55,7 @@ function initGame() {
     gIsOn = true
     gUserLives = 3
     gUserHints = 3
+    gSecs = 0
     gSmileyState = SmileyState.Normal
     console.log(gSmileyState)
     randomizeMines()
@@ -198,13 +201,14 @@ function onCellClicked(elCell, i, j, e) {
 
     if (gIsHintClicked) {
         console.log("gIsHintClicked")
-        revealNgs({i,j})
+        revealNgs({ i, j })
         return
-    } 
+    }
 
     if (gIsFirstClick) {
         gIsFirstClick = false
         if (cell.isMine) changeMineLocation(elCell, i, j)
+        gTimerInterval = setInterval(startTimer, 1000)
     }
 
     if (cell.isMarked || cell.isShown) return //prevent click on cells
@@ -242,12 +246,15 @@ function onMineClicked() {
     revealAllMines()
 }
 
+// TODO: DON'T implement end game logic inside renderMessage() func
 function renderMessage(isWin) {
     gSmileyState = isWin ? SmileyState.Win : SmileyState.Lose
     renderSmiley()
     var elBoard = document.querySelector('body');
     elBoard.innerHTML += `<p>${isWin ? "YOU WON" : "YOU LOST"}</p>`
     gIsOn = false
+    clearInterval(gTimerInterval)
+    storeScore()
 }
 
 function revealAllMines() {
@@ -437,6 +444,7 @@ function onHintClicked() {
      * then onCell click I check if hintClicked
      * basd on that I call exapndAroung, and  should probably set timeout to currCell.isShown = false
      * **/
+    if (!gUserHints) return
     gIsHintClicked = true
 
 }
@@ -466,15 +474,47 @@ function revealNgs(pos) {
     }, 1000);
 }
 
-//duplicate demo
-function expandAround(pos) {
-    for (var i = pos.i - 1; i <= pos.i + 1; i++) {
-        if (i < 0 || i > gBoard.length - 1) continue
-        for (var j = pos.j - 1; j <= pos.j + 1; j++) {
-            if (j < 0 || j > gBoard[0].length - 1) continue
-            if (i === pos.i && j === pos.j) continue
-            var currCell = gBoard[i][j]
-            currCell.isShown = true
-        }
-    }
+
+
+
+
+function startTimer() {
+    var elTimer = document.querySelector(".timer")
+    gSecs++
+    elTimer.innerText = gSecs
+
 }
+
+
+function restartGame() {
+    console.log("restartGame")
+    clearInterval(gTimerInterval)
+    initGame()
+    renderStartingSecs()
+}
+
+function renderStartingSecs() {
+    var elTimer = document.querySelector(".timer")
+    elTimer.innerText = 0
+}
+
+
+//local storage
+function storeScore() {
+
+}
+
+
+
+// //duplicate demo
+// function expandAround(pos) {
+//     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+//         if (i < 0 || i > gBoard.length - 1) continue
+//         for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+//             if (j < 0 || j > gBoard[0].length - 1) continue
+//             if (i === pos.i && j === pos.j) continue
+//             var currCell = gBoard[i][j]
+//             currCell.isShown = true
+//         }
+//     }
+// }
