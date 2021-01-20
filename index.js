@@ -2,8 +2,8 @@
 
 
 
-const MINE = "#"
-const FLAG = "@"
+const MINE = "💣"
+const FLAG = "🏁"
 
 
 var SmileyState = {
@@ -49,6 +49,7 @@ var gIsSafeButtonClicked
 var gIsGodMode = false
 
 var gGodModeMines = []
+var gUserOperations = []
 
 
 //when page loads
@@ -67,6 +68,18 @@ function initGame() {
     gSmileyState = SmileyState.Normal
 
     gGodModeMines = []
+
+    //undo
+    gUserOperations = []
+    // var operation = {
+    //     cellPos = {
+
+    //     },
+    //     cellContent = {
+
+    //     }
+    //     // cell = {} ?
+    // }
 
     gGame.isOn = true,
         gGame.shownCount = 0,
@@ -113,7 +126,7 @@ function randomizeMines() {
 }
 
 //random single mine location on board
-function randomizeMine() {
+function randomizeMine(pos) {
 
     var isMine = true
     var cell = null
@@ -122,6 +135,7 @@ function randomizeMine() {
     while (isMine) {
         var rndI = getRandomInt(0, gLevel.size)
         var rngJ = getRandomInt(0, gLevel.size)
+        if (rndI === pos.i && rngJ === pos.j) continue
         cell = gBoard[rndI][rngJ]
         if (!cell.isMine) isMine = false
     }
@@ -168,7 +182,7 @@ function renderBoard(board) {
                 strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${FLAG}</td>`
             }
             else if (cell.isMine) {
-                strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? "#" : ""}</td>`
+                strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? MINE : ""}</td>`
             }
             else if (cell.isMarked) {
                 strHTML += `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
@@ -328,7 +342,7 @@ function revealMine() {
 // implement) how to hide the
 // context menu on right click
 function onCellMarked(elCell, i, j, e) {
-    if (!gGame.isOn) return
+    if (!gGame.isOn || gIsGodMode) return
     e.preventDefault()
     var cell = gBoard[i][j]
     console.log(cell.isShown)
@@ -431,8 +445,9 @@ function onLevelClicked(size) {
     }
 }
 
+//maybe there is small bug with i,j  - fixed
 function changeMineLocation(elCell, i, j) {
-    randomizeMine()
+    randomizeMine({ i, j })
     gBoard[i][j].isMine = false
     setMinesNegsCount()
 }
@@ -703,4 +718,18 @@ function createMines() {
     gLevel.mines = gGodModeMines.length
     gIsGodMode = false
     document.querySelector(".godmode-message").classList.add("hide")
+}
+
+
+/**
+ * 
+ * maybe array of objects...?
+ * each object will containt the prev operation ?
+ * prev mines/marked(cell?) pos
+ * then each click add the obj to arr
+ * 
+ * 
+ * **/
+function undo() {
+    console.log("undo")
 }
