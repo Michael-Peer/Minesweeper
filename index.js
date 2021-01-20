@@ -6,10 +6,16 @@ const MINE = "💣"
 const FLAG = "🏁"
 
 
-var SmileyState = {
+const SmileyState = {
     Normal: "😀",
     Win: "😎",
     Lose: "🤯"
+}
+
+const ButtonState = {
+    EASY: "easy",
+    MEDIUM: "medium",
+    HARD: "hard"
 }
 
 var gBoard
@@ -50,6 +56,8 @@ var gIsGodMode = false
 
 var gGodModeMines = []
 var gUserOperations = []
+
+var gPreviousSizeByb = 'easy'
 
 
 //when page loads
@@ -421,28 +429,48 @@ function expandAround(pos) {
 }
 
 
-function onLevelClicked(size) {
+function onLevelClicked(size, el) {
     switch (size) {
         case 4:
             gLevel.size = size
             gLevel.mines = 2
             restartGame()
+
+            changeBtnClass(el, ButtonState.EASY)
+
+
             break;
         case 8:
             gLevel.size = size
             gLevel.mines = 8
             restartGame()
+
+            changeBtnClass(el, ButtonState.MEDIUM)
+
             break;
         case 12:
             gLevel.size = size
             gLevel.mines = 12
             restartGame()
+
+            changeBtnClass(el, ButtonState.HARD)
+
+
             break;
 
         default:
             console.log("Well, you have big problem if you ended up here")
             break;
     }
+}
+
+function changeBtnClass(el, className) {
+    document.getElementById(gPreviousSizeByb).classList.remove("size-btn")
+    document.getElementById(gPreviousSizeByb).classList.add("small-size-btn")
+    el.classList.add("size-btn")
+    el.classList.remove("small-size-btn")
+
+    gPreviousSizeByb = className
 }
 
 //maybe there is small bug with i,j  - fixed

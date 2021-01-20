@@ -10,28 +10,40 @@
 </head>
 
 <body onload="initGame()">
-<p class="message"></p>
-<p class="hint-message"></p>
-<div class="godmode-message"></div>
+    <div class="container">
+        <p class="lives"></p>
 
-    <table border="1" cellpadding="16">
-        <tbody class="board">
+        <div id="easy" onclick="onLevelClicked(4, this)" class="size-btn">
+            <p class="size-btn-content">Easy</p>
+        </div>
 
-        </tbody>
-    </table>
-    <button onclick="onLevelClicked(4)">Beginner</button>
-    <button  onclick="onLevelClicked(8)">Medium</button>
-    <button  onclick="onLevelClicked(12)">Expert</button>
-    <p class="smiley" onclick="restartGame()"></p>
-    <p class="lives"></p>
-    <p onclick="onHintClicked()" class="hints"></p>
-    <p class="timer">0</p>
-    <p class="best-score">It's your first time! play to set the best score</p>
-    <button onclick="onSafeButtonClicked()" class="safe-button">Safe Button</button>
-    <p class="safe-button-text">3 clicks available</p>
-    <button class="god-mode" onclick="onGodModeClicked()">GOD MODE</button>
-    <br>
-    <button class="undo" onclick="undo()">Undo</button>
+        <div id="medium" onclick="onLevelClicked(8, this)" class="small-size-btn">
+            <p class="size-btn-content">Medium</p>
+        </div>
+        <div id="hard" onclick="onLevelClicked(12, this)" class="small-size-btn">
+            <p class="size-btn-content">Hard</p>
+        </div>
+        <p class="message"></p>
+        <p class="hint-message"></p>
+        <div class="godmode-message"></div>
+
+        <table class="table" border="1" cellpadding="16">
+            <tbody class="board">
+
+            </tbody>
+        </table>
+
+        <p class="smiley" onclick="restartGame()"></p>
+        <p onclick="onHintClicked()" class="hints"></p>
+        <p class="timer">0</p>
+        <p class="best-score">It's your first time! play to set the best score</p>
+        <button onclick="onSafeButtonClicked()" class="safe-button">Safe Button</button>
+        <p class="safe-button-text">3 clicks available</p>
+        <button class="god-mode" onclick="onGodModeClicked()">GOD MODE</button>
+        <br>
+        <button class="undo" onclick="undo()">Undo</button>
+
+    </div>
 
 
 

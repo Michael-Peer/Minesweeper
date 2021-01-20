@@ -1,19 +1,113 @@
-.safe {
-    background-color: lightblue;
+* {
+  /* box-sizing: border-box; */
 }
-.god-mode-text{
-    display: inline-block;
-    margin-right: 5px;
+
+td {
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+td:hover {
+  background-color: lightgray;
+}
+
+.container {
+  position: relative;
+  margin: auto;
+  width: 80%;
+  border: 3px solid black;
+  padding: 10px;
+  text-align: center;
+}
+
+.size-btn {
+  display: inline-block;
+  margin: 10px;
+  cursor: pointer;
+
+  width: 100px;
+  height: 100px;
+  background: #ff9100;
+  z-index: 999;
+  line-height: 50px;
+  text-align: center;
+  overflow: hidden;
+  font-size: 26px;
+  color: #fff;
+  box-shadow: 0px 3px 9px rgba(0, 0, 0, 0.5);
+  border-radius: 50px;
+}
+
+.small-size-btn {
+  display: inline-block;
+  cursor: pointer;
+
+  margin: 10px;
+  width: 60px;
+  height: 60px;
+  line-height: 30px;
+  background: #ff9100;
+  text-align: center;
+  overflow: hidden;
+  font-size: 16px;
+  color: #fff;
+  border-radius: 50px;
+}
+
+.lives {
+  display: inline-block;
+  position: absolute;
+  left: 25px;
+  top: 0px;
+  margin: 0;
+  font-size: 30px;
+}
+
+.hints {
+  display: inline-block;
+  position: absolute;
+  left: 25px;
+  top: 60px;
+  margin: 0;
+  font-size: 30px;
+}
+
+.timer {
+  display: inline-block;
+  position: absolute;
+  right:  25px;
+  top: 25px;
+  margin: 0;
+  font-size: 30px;
+}
+
+.table {
+  margin-left: auto;
+  margin-right: auto;
+  table-layout: fixed;
+}
+
+.safe {
+  background-color: lightblue;
+}
+.god-mode-text {
+  display: inline-block;
+  margin-right: 5px;
 }
 
 .hide {
-    display: none;
+  display: none;
 }
 
 .small-m-l {
-    margin-left: 5px;
+  margin-left: 5px;
 }
 
 .undo {
-    margin-top: 5px;
+  margin-top: 5px;
+}
+
+.smiley{
+  font-size: 45px;
 }
