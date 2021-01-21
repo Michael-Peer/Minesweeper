@@ -56,8 +56,17 @@ var gIsGodMode = false
 
 var gGodModeMines = []
 var gUserOperations = []
+var gExpendedCells = []
+
+var operation = {
+    hints: 3,
+    lives: 3,
+    cell: { minesAroundCount: 0, isShown: false, isMine: false, isMarked: false, pos: { i: null, j: null } },
+    expandedCells: []
+}
 
 var gPreviousSizeByb = 'easy'
+
 
 
 //when page loads
@@ -79,15 +88,7 @@ function initGame() {
 
     //undo
     gUserOperations = []
-    // var operation = {
-    //     cellPos = {
 
-    //     },
-    //     cellContent = {
-
-    //     }
-    //     // cell = {} ?
-    // }
 
     gGame.isOn = true,
         gGame.shownCount = 0,
@@ -207,10 +208,10 @@ function renderBoard(board) {
             }
             else if (cell.isMarked) {
                 strHTML += `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
-            } else if(cell.isShown) {
+            } else if (cell.isShown) {
                 strHTML += `<td id="${i},${j}" class="expand" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.minesAroundCount > 0 ? cell.minesAroundCount : ""}</td>`
             }
-            
+
             else {
                 strHTML += `<td id="${i},${j}"  onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.isShown ? cell.minesAroundCount : ""}</td>`
             }
@@ -273,6 +274,8 @@ function countNegs(pos) {
 // clicked
 function onCellClicked(elCell, i, j, e) {
 
+    gExpendedCells = []
+
     if (!gGame.isOn) return
     if (gIsGodMode) {
         createMine(i, j)
@@ -299,7 +302,7 @@ function onCellClicked(elCell, i, j, e) {
 
     //both mine and 0 lives
     if (cell.isMine && !gUserLives) {
-        onMineClicked()
+        onMineClicked(cell, { i, j })
         return
     } else if (cell.isMine && gUserLives) {
         gUserLives--
@@ -315,6 +318,7 @@ function onCellClicked(elCell, i, j, e) {
     cell.isShown = true
 
     if (!cell.minesAroundCount && !cell.isMine) expandShown(gBoard, elCell, i, j)
+    addOperation(cell, { i, j })
 
     renderBoard() //TODO: Reduce unnecessary rendering use innerText/html instead
     checkGameOver()
@@ -407,7 +411,7 @@ function checkGameOver() {
             else if (cell.isShown && !cell.isMine) cellCnt--
         }
     }
-    console.log(cellCnt, mines)
+    // console.log(cellCnt, mines)
     if (!cellCnt && !mines) renderMessage(true)
 }
 
@@ -440,10 +444,13 @@ function expandAround(pos) {
             if (j < 0 || j > gBoard[0].length - 1) continue
             if (i === pos.i && j === pos.j) continue
             var currCell = gBoard[i][j]
-            if (!currCell.isMarked) currCell.isShown = true
+            if (!currCell.isMarked) {
+                currCell.isShown = true
+                gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+            }
             // if there currCell.mineAround > 0 --> keep expanding
             // if (currCell.minesAroundCount > 0) {
-            //     expandAround ({i, j})
+            //     returnexpandAround ({i, j})
             // }
         }
     }
@@ -783,7 +790,67 @@ function createMines() {
  * then each click add the obj to arr
  * 
  * 
+ * remove expanded cells
+ * 
+ * 
  * **/
 function undo() {
     console.log("undo")
+    // console.log(gUserOperations)
+    if (!gUserOperations.length) return
+    var lastOperation = gUserOperations[gUserOperations.length - 1]
+    // console.log(lastOperation.expandedCells)
+    undoOperation(lastOperation)
 }
+
+function undoOperation(operation) {
+
+    if (operation.cell.isMine) {
+        console.log("MIVE!!!!!!!!!!!111")
+        gBoard[operation.cell.pos.i][operation.cell.pos.j].isShown = false
+        gUserLives++
+        renderLives()
+        renderBoard()
+        return
+    }
+
+    console.log(operation.expandedCells)
+
+    var expandedCells = operation.expandedCells
+
+    for (var i = 0; i < expandedCells.length; i++) {
+        var row = expandedCells[i].pos.i
+        var col = expandedCells[i].pos.j
+        gBoard[row][col].isShown = false
+        console.log(expandedCells[i].originPos)
+    }
+    gBoard[expandedCells[0].originPos.i][expandedCells[0].originPos.j].isShown = false
+    renderBoard()
+    gUserOperations.pop()
+
+}
+
+function addOperation(cell, pos, hints = gUserHints, lives = gUserLives) {
+
+    console.log(cell.isMine)
+
+    var operation = {}
+    operation.hints = gUserHints
+    operation.lives = gUserLives
+    operation.cell = {
+        minesAroundCount: cell.minesAroundCount,
+        isShown: cell.isShown,
+        isMine: cell.isMine,
+        isMarked: cell.isMarked,
+        pos: { i: pos.i, j: pos.j }
+    },
+        operation.expandedCells = gExpendedCells
+
+
+    gUserOperations.push(operation)
+
+}
+
+
+
+
