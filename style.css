@@ -68,19 +68,27 @@ td:hover {
 }
 
 .hints {
-  display: inline-block;
+  /* display: inline-block;
   position: absolute;
   left: 25px;
   top: 60px;
   margin: 0;
+  font-size: 30px; */
+
+  display: inline-block;
+  position: absolute;
+  right: 25px;
+  top: 0px;
+  margin: 0;
   font-size: 30px;
 }
+
 
 .timer {
   display: inline-block;
   position: absolute;
   right: 25px;
-  top: 25px;
+  top: 100px;
   margin: 0;
   font-size: 30px;
 }
@@ -95,7 +103,6 @@ td:hover {
 .safe {
   background-color: lightblue;
 }
-
 
 .god-mode-text {
   display: inline-block;
@@ -120,7 +127,7 @@ td:hover {
   display: inline-block;
   width: 100px;
   height: 100px;
-
+  cursor: pointer;
   left: 25%;
   top: 20px;
   margin: 0;
@@ -132,10 +139,19 @@ td:hover {
   display: inline-block;
   width: 100px;
   height: 100px;
-
-  left: 75%;
+  cursor: pointer;
+  right: 25%;
   top: 20px;
   margin: 0;
+}
+
+
+.smiley-right:hover {
+  font-size: 90px;
+}
+
+.smiley-left:hover {
+  font-size: 90px;
 }
 
 .bomb {

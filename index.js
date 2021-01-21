@@ -456,8 +456,16 @@ function expandAround(pos) {
             var currCell = gBoard[i][j]
             if (!currCell.isMarked) {
                 if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
-                currCell.isShown = true  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
+                  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
+
+                if (!currCell.minesAroundCount && !currCell.isShown) {
+                    currCell.isShown = true
+                    console.log(currCell.minesAroundCount, "expandAround")
+                    return expandAround({ i: i, j: j })
+                }
             }
+
+
             // if there currCell.mineAround > 0 --> keep expanding
             // if (currCell.minesAroundCount > 0) {
             //     returnexpandAround ({i, j})
@@ -465,6 +473,8 @@ function expandAround(pos) {
         }
     }
 }
+
+
 
 
 function onLevelClicked(size, el) {
@@ -564,7 +574,7 @@ function renderHints() {
             break;
     }
     var elHints = document.querySelector('.hints');
-    elHints.innerHTML = `<p>${hints} Hints</p>`
+    elHints.innerHTML = `<p>Hints ${hints}</p>`
 }
 
 function onHintClicked() {
