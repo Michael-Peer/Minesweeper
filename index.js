@@ -61,7 +61,16 @@ var gExpendedCells = []
 var operation = {
     hints: 3,
     lives: 3,
-    cell: { minesAroundCount: 0, isShown: false, isMine: false, isMarked: false, pos: { i: null, j: null } },
+    cell: {
+        minesAroundCount: 0,
+        isShown: false,
+        isMine: false,
+        isMarked: false,
+        pos: {
+            i: null,
+            j: null
+        }
+    },
     expandedCells: []
 }
 
@@ -397,6 +406,7 @@ function onCellMarked(elCell, i, j, e) {
 function checkGameOver() {
     var mines = gLevel.mines
     var cellCnt = gBoard.length * gBoard.length - mines
+    console.log("before", cellCnt, mines)
 
 
     for (var i = 0; i < gBoard.length; i++) {
@@ -411,7 +421,7 @@ function checkGameOver() {
             else if (cell.isShown && !cell.isMine) cellCnt--
         }
     }
-    // console.log(cellCnt, mines)
+    console.log("after", cellCnt, mines)
     if (!cellCnt && !mines) renderMessage(true)
 }
 
@@ -747,6 +757,7 @@ function createMine(i, j) {
     console.log("creating...", { i, j })
 
     var elCell = document.getElementById(`${i},${j}`)
+    if (elCell.innerText === MINE) return //prevent messing with mines cnt
     elCell.innerText = MINE
     gGodModeMines.push({ i, j })
 
@@ -795,9 +806,10 @@ function createMines() {
  * 
  * **/
 function undo() {
-    console.log("undo")
     // console.log(gUserOperations)
-    if (!gUserOperations.length) return
+    if (!gUserOperations.length || !gGame.isOn) return
+    console.log("undo")
+
     var lastOperation = gUserOperations[gUserOperations.length - 1]
     // console.log(lastOperation.expandedCells)
     undoOperation(lastOperation)
@@ -811,12 +823,19 @@ function undoOperation(operation) {
         gUserLives++
         renderLives()
         renderBoard()
+        gUserOperations.pop()
         return
     }
 
-    console.log(operation.expandedCells)
 
     var expandedCells = operation.expandedCells
+    if(!expandedCells.length) {
+        console.log("not expanded!!!")
+        gBoard[operation.cell.pos.i][operation.cell.pos.j].isShown = false
+        renderBoard()
+        gUserOperations.pop()
+        return
+    }
 
     for (var i = 0; i < expandedCells.length; i++) {
         var row = expandedCells[i].pos.i
