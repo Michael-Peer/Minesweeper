@@ -11,15 +11,15 @@
 
 <body onload="initGame()">
     <div class="container">
-        <p class="lives"></p>
+        <div class="lives"></div>
         <div class="smiley-left" onclick="restartGame()"></div>
         <div class="smiley-right" onclick="restartGame()"></div>
 
-        <div id="easy" onclick="onLevelClicked(4, this)" class="size-btn">
+        <div id="easy" onclick="onLevelClicked(4, this)" class=" size-btn">
             <p class="size-btn-content">Easy</p>
         </div>
 
-        <div id="medium" onclick="onLevelClicked(8, this)" class="small-size-btn">
+        <div id="medium" onclick="onLevelClicked(8, this)" class=" small-size-btn">
             <p class="size-btn-content">Medium</p>
         </div>
         <div id="hard" onclick="onLevelClicked(12, this)" class="small-size-btn">
@@ -27,7 +27,6 @@
         </div>
 
         <p class="message"></p>
-        <p class="hint-message"></p>
         <div class="godmode-message"></div>
 
         <table class="table" border="1" cellpadding="16">
@@ -36,7 +35,12 @@
             </tbody>
         </table>
 
-        <p onclick="onHintClicked()" class="hints"></p>
+        <p class="bulb-indication">💡</p>
+
+        <div onclick="onHintClicked()" class="hints">
+            <p class="bulb">Hints</p>
+        </div>
+
         <p class="timer">0</p>
         <p class="best-score">It's your first time! play to set the best score</p>
         <button onclick="onSafeButtonClicked()" class="safe-button">Safe Button</button>

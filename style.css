@@ -74,6 +74,7 @@ td:hover {
   top: 60px;
   margin: 0;
   font-size: 30px; */
+  cursor: pointer;
 
   display: inline-block;
   position: absolute;
@@ -160,4 +161,25 @@ td:hover {
 
 .expand {
   background-color: #7f7ca0;
+}
+
+.bulb  {
+  display: inline-block;
+}
+
+
+.bulb-indication{
+  display: none;
+  position: absolute;
+  right: 10%;
+  top: 30%;
+  font-size: 60px;
+}
+
+.message{
+  display: none;
+  position: absolute;
+  right: 10%;
+  top: 30%;
+  font-size: 25px;
 }

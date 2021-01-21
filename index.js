@@ -36,14 +36,6 @@ var gGame = {
 } // will be implemented later, currenty the game perfectly working without it
 
 
-//demo
-var cell = {
-    minesAroundCount: 4,
-    isShown: false,
-    isMine: false,
-    isMarked: false
-}
-
 
 var gIsFirstClick
 var gUserLives
@@ -61,8 +53,8 @@ var gUserOperations = []
 var gExpendedCells = []
 
 var operation = {
-    hints: 3,
-    lives: 3,
+    hints: gUserLives,
+    lives: gUserLives,
     cell: {
         minesAroundCount: 0,
         isShown: false,
@@ -299,7 +291,6 @@ function onCellClicked(elCell, i, j, e) {
     if (gIsHintClicked) {
         console.log("gIsHintClicked")
         revealNgs({ i, j })
-        renderHintMessage(false)
         return
     }
 
@@ -349,8 +340,9 @@ function onMineClicked() {
 function renderMessage(isWin) {
     gSmileyState = isWin ? SmileyState.Win : SmileyState.Lose
     renderSmiley()
-    var elBoard = document.querySelector('.message');
-    elBoard.innerHTML = `<p>${isWin ? `YOU WON with ${gUserLives} ${gUserLives > 1 ? "lives" : "life"} left` : "YOU LOST"}</p>`
+    var elMessage = document.querySelector('.message');
+    elMessage.innerHTML = `<p>${isWin ? `YOU WON with ${gUserLives} ${gUserLives > 1 ? "lives" : "life"} left` : "YOU LOST"}</p>`
+    elMessage.style.display = "inline-block"
     gGame.isOn = false
     clearInterval(gTimerInterval)
     storeScore()
@@ -448,23 +440,6 @@ function expandShown(board, elCell, i, j) {
     renderBoard() //TODO:  render only the relevent cells!!!!
 }
 
-//TODO: Think how to merge this and the neg count func, it's basically the same function - maybe a bool that determine the purpose
-// function expandAround(pos) {
-//     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
-//         if (i < 0 || i > gBoard.length - 1) continue
-//         for (var j = pos.j - 1; j <= pos.j + 1; j++) {
-//             if (j < 0 || j > gBoard[0].length - 1) continue
-//             if (i === pos.i && j === pos.j) continue
-//             var currCell = gBoard[i][j]
-//             if (!currCell.isMarked) {
-if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
-//                 currCell.isShown = true  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
-//                 console.log(currCell.minesAroundCount, "expandAround")
-//             }
-//         }
-//     }
-// }
-
 function expandAround(pos) {
     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
         if (i < 0 || i > gBoard.length - 1) continue
@@ -506,7 +481,7 @@ function onLevelClicked(size, el) {
             break;
         case 8:
             gLevel.size = size
-            gLevel.mines = 8
+            gLevel.mines = 12
             restartGame()
 
             changeBtnClass(el, ButtonState.MEDIUM)
@@ -514,7 +489,7 @@ function onLevelClicked(size, el) {
             break;
         case 12:
             gLevel.size = size
-            gLevel.mines = 12
+            gLevel.mines = 30
             restartGame()
 
             changeBtnClass(el, ButtonState.HARD)
@@ -589,6 +564,7 @@ function renderHints() {
         default:
             break;
     }
+
     var elHints = document.querySelector('.hints');
     elHints.innerHTML = `<p>Hints ${hints}</p>`
 }
@@ -611,14 +587,20 @@ function onHintClicked() {
      * 
      * Logic is done
      * **/
-    if (!gUserHints || gIsGodMode) return
+
+
+
+    if (!gUserHints || gIsGodMode || !gGame.isOn) return
+    if (!gIsHintClicked) {
+        var elBulb = document.querySelector(".bulb-indication")
+        elBulb.style.display = "inline-block"
+        gUserHints--
+        renderHints()
+    }
     gIsHintClicked = true
-    renderHintMessage(true)
 }
 
-function renderHintMessage(isHintMode) {
-    document.querySelector(".hint-message").innerText = `${isHintMode ? "Hint mode is active" : ""} `
-}
+
 
 function revealNgs(pos) {
     var ngs = []
@@ -643,7 +625,7 @@ function revealNgs(pos) {
         }
         renderBoard()
         gIsHintClicked = false
-        gUserHints--
+        document.querySelector(".bulb-indication").style.display = "none"
         renderHints()
     }, 1000);
 }
@@ -843,6 +825,11 @@ function undo() {
 }
 
 function undoOperation(operation) {
+
+
+    gUserHints = operation.hints
+    console.log("gUserHints", gUserHints)
+    renderHints()
 
     if (operation.cell.isMine) {
         console.log("MIVE!!!!!!!!!!!111")
