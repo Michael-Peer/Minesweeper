@@ -6,58 +6,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minesweeper</title>
 
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./style/style.css">
 </head>
 
 <body onload="initGame()">
-    <div class="container">
-        <div class="lives"></div>
-        <div class="smiley-left" onclick="restartGame()"></div>
-        <div class="smiley-right" onclick="restartGame()"></div>
 
-        <div id="easy" onclick="onLevelClicked(4, this)" class=" size-btn">
-            <p class="size-btn-content">Easy</p>
-        </div>
+    <div class="lives"></div>
+    <div class="smiley-left" onclick="restartGame()"></div>
+    <div class="smiley-right" onclick="restartGame()"></div>
 
-        <div id="medium" onclick="onLevelClicked(8, this)" class=" small-size-btn">
-            <p class="size-btn-content">Medium</p>
-        </div>
-        <div id="hard" onclick="onLevelClicked(12, this)" class="small-size-btn">
-            <p class="size-btn-content">Hard</p>
-        </div>
+    <div id="easy" onclick="onLevelClicked(4, this)" class="small-size-btn">
+        <p class="size-btn-content">Easy</p>
+    </div>
 
-        <p class="message"></p>
-        <div class="godmode-message"></div>
+    <div id="medium" onclick="onLevelClicked(8, this)" class=" size-btn ">
+        <p class="size-btn-content">Medium</p>
+    </div>
+    <div id="hard" onclick="onLevelClicked(12, this)" class="small-size-btn">
+        <p class="size-btn-content">Hard</p>
+    </div>
 
-        <table class="table" border="1" cellpadding="16">
-            <tbody class="board">
+    <p class="message"></p>
+    <div class="godmode-message"></div>
 
-            </tbody>
-        </table>
+    <table class="table" border="1" cellpadding="16">
+        <tbody class="board">
 
-        <p class="bulb-indication">💡</p>
+        </tbody>
+    </table>
 
-        <div onclick="onHintClicked()" class="hints">
-            <p class="bulb">Hints</p>
-        </div>
+    <p class="bulb-indication">💡</p>
 
-        <p class="timer">0</p>
-        <p class="best-score">It's your first time! play to set the best score</p>
-        <button onclick="onSafeButtonClicked()" class="safe-button">Safe Button</button>
+    <div onclick="onHintClicked()" class="hints">
+        <p class="bulb">Hints</p>
+    </div>
+
+    <p class="timer">0</p>
+    <p class="best-score">It's your first time! play to set the best score</p>
+
+    <div class="safe-button-cotinaer">
+        <button onclick="onSafeButtonClicked()" class="btn safe-button">Safe Button</button>
         <p class="safe-button-text">3 clicks available</p>
-        <button class="god-mode" onclick="onGodModeClicked()">GOD MODE</button>
-        <br>
-        <button class="undo" onclick="undo()">Undo</button>
-
     </div>
 
 
+    <button class=" hide  btn exit" onclick="exitGodMode()">EXIT</button>
+    <button class=" god-mode btn " onclick="onGodModeClicked()">GOD MODE</button>
+    <button class=" hide btn play" onclick="createMines()"> Play </button>
+
+    <br>
+    <button class="undo" onclick="undo()">↩️</button>
 
 
 
 
-    <script src="./utils.js"></script>
-    <script src="./index.js"></script>
+
+    <script src="./js/utils/utils.js"></script>
+    <script src="./js/undo.js"></script>
+    <script src="./js/hint.js"></script>
+    <script src="./js/mines.js"></script>
+    <script src="./js/index.js"></script>
+    <script src="./js/godMode.js"></script>
+
 </body>
 
 </html>

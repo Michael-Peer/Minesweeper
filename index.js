@@ -1,9 +1,6 @@
 'use strict'
 
 
-
-
-
 const MINE = "💣"
 const FLAG = "🏁"
 
@@ -21,10 +18,9 @@ const ButtonState = {
 }
 
 var gBoard
-// var gCell
 var gLevel = {
-    size: 4,
-    mines: 2
+    size: 8,
+    mines: 12
 }
 
 var gGame = {
@@ -68,7 +64,7 @@ var operation = {
     expandedCells: []
 }
 
-var gPreviousSizeBtn = ButtonState.EASY
+var gPreviousSizeBtn = ButtonState.MEDIUM
 
 
 
@@ -104,7 +100,6 @@ function initGame() {
 }
 
 function renderContent() {
-    console.log(gSmileyState)
     if (!gIsGodMode) randomizeMines()
     renderBoard()
     // randomizeMines()
@@ -115,57 +110,6 @@ function renderContent() {
     setBestScore()
     setMinesNegsCount()
 }
-
-//random mines location on board
-function randomizeMines() {
-    var prevI
-    var prevJ
-    var isFirstTimeRuning = true
-    for (var i = 0; i < gLevel.mines; i++) {
-        var rndI = getRandomInt(0, gLevel.size)
-        var rngJ = getRandomInt(0, gLevel.size)
-        // console.log("before")
-
-        //prevent 2 mines on same spot
-        if (!isFirstTimeRuning) {
-            while (rndI === prevI && rngJ == prevJ) {
-                rndI = getRandomInt(0, gLevel.size)
-                rngJ = getRandomInt(0, gLevel.size)
-                console.log("in while")
-            }
-            prevI = rndI
-            prevJ = rngJ
-        } else {
-            isFirstTimeRuning = false
-            prevI = rndI
-            prevJ = rngJ
-        }
-
-        // console.log("after")
-
-        var cell = gBoard[rndI][rngJ]
-        cell.isMine = true
-    }
-}
-
-//random single mine location on board
-function randomizeMine(pos) {
-
-    var isMine = true
-    var cell = null
-
-    //TOOD: more efficent while, get rid of isMine bool
-    while (isMine) {
-        var rndI = getRandomInt(0, gLevel.size)
-        var rngJ = getRandomInt(0, gLevel.size)
-        if (rndI === pos.i && rngJ === pos.j) continue
-        cell = gBoard[rndI][rngJ]
-        if (!cell.isMine) isMine = false
-    }
-    cell.isMine = true
-}
-
-
 
 /**
  * 
@@ -184,22 +128,22 @@ function buildBoard() {
             board[i][j] = cell
         }
     }
-    // board[3][3].isMine = true
-    // board[1][3].isMine = true
     console.table(board)
     return board
 }
 
 // Render the board as a <table>
 // to the page
-function renderBoard(board) {
+function renderBoard() {
+
+    console.log("rendering....")
     var strHTML = '';
     for (var i = 0; i < gBoard.length; i++) {
         strHTML += `<tr class="" >`
         for (var j = 0; j < gBoard[0].length; j++) {
             var cell = gBoard[i][j]
 
-            //TODO: Convert to switch? or more efficent approach
+            //TODO:  more efficent approach
             //TODO: Pass data instead of ${i, j} - save code
             if (cell.isMine && cell.isMarked) {
                 strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${FLAG}</td>`
@@ -228,48 +172,29 @@ function renderBoard(board) {
 }
 
 
+// function renderHtml(elCell, cell, i, j) {
+//     console.log(cell)
 
+//     console.log(elCell)
+//     if (cell.isMine && cell.isMarked) {
+//         elCell.innerHTML = `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${FLAG}</td>`
+//     } else if (cell.isMine && cell.isShown) {
+//         elCell.innerHTML = `<td id="${i},${j}" class="bomb" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? MINE : ""}</td>`
+//     }
+//     else if (cell.isMine) {
+//         console.log("ismineqweqeqeqeq")
+//         elCell.innerHTML = `<td id="${i},${j}"  mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? MINE : ""}</td>`
+//     }
+//     else if (cell.isMarked) {
+//         elCell.innerHTML = `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
+//     } else if (cell.isShown) {
+//         elCell.innerHTML = `<td id="${i},${j}" class="expand" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.minesAroundCount > 0 ? cell.minesAroundCount : ""}</td>`
+//     }
 
-
-
-// Count mines around each cell
-// and set the cell's
-// minesAroundCount.
-function setMinesNegsCount(board) {
-
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard.length; j++) {
-            var cell = gBoard[i][j]
-
-            if (gBoard[i][j].isMine) continue
-
-            var cellNegsCnt = countNegs({ i, j })
-            cell.minesAroundCount = cellNegsCnt
-            // cell.isShown = true
-
-            // console.log(`CNT: ${cellNegsCnt}, pos: ${i}, ${j}`)
-            // console.log(cell)
-        }
-    }
-
-    renderBoard()
-}
-
-
-
-function countNegs(pos) {
-    var count = 0
-    for (var i = pos.i - 1; i <= pos.i + 1; i++) {
-        if (i < 0 || i > gBoard.length - 1) continue
-        for (var j = pos.j - 1; j <= pos.j + 1; j++) {
-            if (j < 0 || j > gBoard[0].length - 1) continue
-            if (i === pos.i && j === pos.j) continue
-            var currCell = gBoard[i][j]
-            if (currCell.isMine) count++
-        }
-    }
-    return count
-}
+//     else {
+//         strHTML += `<td id="${i},${j}"  onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.isShown ? cell.minesAroundCount : ""}</td>`
+//     }
+// }
 
 
 
@@ -277,19 +202,19 @@ function countNegs(pos) {
 // clicked
 function onCellClicked(elCell, i, j, e) {
 
-    gExpendedCells = []
+    gExpendedCells = [] // whcih cells expanded - undo impl
 
     if (!gGame.isOn) return
+    console.log(gIsGodMode)
+
     if (gIsGodMode) {
         createMine(i, j)
         return
     }
 
-
     var cell = gBoard[i][j]
 
     if (gIsHintClicked) {
-        console.log("gIsHintClicked")
         revealNgs({ i, j })
         return
     }
@@ -302,24 +227,19 @@ function onCellClicked(elCell, i, j, e) {
 
     if (cell.isMarked || cell.isShown) return //prevent click on cells
 
-    //both mine and 0 lives
     if (cell.isMine && !gUserLives) {
         onMineClicked(cell, { i, j })
         return
     } else if (cell.isMine && gUserLives) {
         gUserLives--
         !gUserLives ? onMineClicked() : renderLives()
-        // renderWarning(i,j)
+        // renderWarning(i,j) ??
     }
-
-    //psuedo code 
-    // if it's a mine AND user lives > 0
-    // reveal the mine and cointinue play
-    //problem to solve: counters on checkGameover (cell count == -2 in the end, should be 0) maybe add check if cell is mine --> continue
 
     cell.isShown = true
 
-    if (!cell.minesAroundCount && !cell.isMine) expandShown(gBoard, elCell, i, j)
+    if (!cell.minesAroundCount && !cell.isMine) expandShown(gBoard, elCell, i, j) //expanding negs
+
     addOperation(cell, { i, j })
 
     renderBoard() //TODO: Reduce unnecessary rendering use innerText/html instead
@@ -328,10 +248,6 @@ function onCellClicked(elCell, i, j, e) {
 }
 
 function onMineClicked() {
-    // if (!gUserLives) {
-    //     revealMine(i, j)
-    //     return
-    // }
     renderMessage(false)
     revealAllMines()
 }
@@ -348,24 +264,6 @@ function renderMessage(isWin) {
     storeScore()
 }
 
-function revealAllMines() {
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard[0].length; j++) {
-            var cell = gBoard[i][j]
-            if (cell.isMine) {
-                cell.isMarked = false
-                cell.isShown = true
-            }
-        }
-    }
-
-    renderBoard() //TODO: Reduce unnecessary rendering
-}
-
-//only reveal mine when live > 0 - X
-function revealMine() {
-    // gBoard[i][j].isShown = true
-}
 
 
 // Called on right click to mark a
@@ -382,16 +280,17 @@ function onCellMarked(elCell, i, j, e) {
     if (cell.isMarked) {
         cell.isMarked = !cell.isMarked
         gGame.markedCount--
+        elCell.innerHTML = `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" ></td>`
     } else {
         cell.isMarked = true
         gGame.markedCount++
+        elCell.innerHTML = `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
+
     }
-    console.log("adssadsad")
     checkGameOver() // case where we reveal all the non-mines cells but we didn't marked the mines yet
-    renderBoard()
+
+    // renderBoard()
 }
-
-
 
 
 // Game ends when all mines are
@@ -400,7 +299,7 @@ function onCellMarked(elCell, i, j, e) {
 function checkGameOver() {
     var mines = gLevel.mines
     var cellCnt = gBoard.length * gBoard.length - mines
-    console.log("before", cellCnt, mines)
+    // console.log("before", cellCnt, mines)
 
 
     for (var i = 0; i < gBoard.length; i++) {
@@ -415,7 +314,7 @@ function checkGameOver() {
             else if (cell.isShown && !cell.isMine) cellCnt--
         }
     }
-    console.log("after", cellCnt, mines)
+    // console.log("after", cellCnt, mines)
     if (!cellCnt && !mines) renderMessage(true)
 }
 
@@ -437,7 +336,7 @@ function checkGameOver() {
 function expandShown(board, elCell, i, j) {
     // console.log("herevvvv")
     expandAround({ i, j })
-    renderBoard() //TODO:  render only the relevent cells!!!!
+    // renderBoard() //TODO:  render only the relevent cells!!!!
 }
 
 function expandAround(pos) {
@@ -452,20 +351,16 @@ function expandAround(pos) {
                     if (!currCell.isMine) {
                         if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
                         currCell.isShown = true
+                        // var elCell = document.getElementById(`${i},${j}`)
+                        // elCell.innerHTML =  `<td id="${i},${j}" class="expand" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${currCell.minesAroundCount > 0 ? currCell.minesAroundCount : ""}</td>`
                         if (currCell.minesAroundCount > 0) continue
-                        console.log("minadlkdaldakkadadld", currCell.isMine)
                         expandAround({ i, j })
                     }
                 }
-                // if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
-                // currCell.isShown = true  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
-                // console.log(currCell.minesAroundCount, "expandAround")
             }
         }
     }
 }
-
-
 
 
 function onLevelClicked(size, el) {
@@ -570,25 +465,6 @@ function renderHints() {
 }
 
 function onHintClicked() {
-    /**
-     * 
-     * TODO:
-     * when start stying there are 2 approaches:
-     * 1) create 3 different emojis/images and based on this we know to which on we should change color
-     * nthChild(n)
-     * 2) if all three are like lives, we can count length -1 - spaces
-     * 
-     * 
-     * psudeo:
-     * when hint click I need to save hintClciked = true
-     * then onCell click I check if hintClicked
-     * basd on that I call exapndAroung, and  should probably set timeout to currCell.isShown = false
-     * 
-     * 
-     * Logic is done
-     * **/
-
-
 
     if (!gUserHints || gIsGodMode || !gGame.isOn) return
     if (!gIsHintClicked) {
@@ -598,36 +474,6 @@ function onHintClicked() {
         renderHints()
     }
     gIsHintClicked = true
-}
-
-
-
-function revealNgs(pos) {
-    var ngs = []
-    for (var i = pos.i - 1; i <= pos.i + 1; i++) {
-        if (i < 0 || i > gBoard.length - 1) continue
-        for (var j = pos.j - 1; j <= pos.j + 1; j++) {
-            if (j < 0 || j > gBoard[0].length - 1) continue
-            if (i === pos.i && j === pos.j) continue
-            var currCell = gBoard[i][j]
-            if (!currCell.isMarked) {
-                if (currCell.isShown) continue //prevent hiding already opened cells
-                currCell.isShown = true
-                ngs.push(currCell)
-            }
-        }
-    }
-
-    renderBoard()
-    setTimeout(() => {
-        for (var i = 0; i < ngs.length; i++) {
-            ngs[i].isShown = false
-        }
-        renderBoard()
-        gIsHintClicked = false
-        document.querySelector(".bulb-indication").style.display = "none"
-        renderHints()
-    }, 1000);
 }
 
 
@@ -690,11 +536,8 @@ function onSafeButtonClicked() {
     gIsSafeButtonClicked = true
 
     var elCell = null
-    // var rndI = getRandomInt(0, gLevel.size)
-    // var rngJ = getRandomInt(0, gLevel.size)
-    // var cell = gBoard[rndI][rngJ]
 
-    //for completely random cell
+    //random cells
     for (var i = 0; i < gLevel.size; i++) {
         for (var j = 0; j < gLevel.size; j++) {
             var cell = gBoard[i][j]
@@ -728,164 +571,15 @@ function onSafeButtonClicked() {
 
 function renderAvailableClicks() {
     var elSafeButtonTxt = document.querySelector(".safe-button-text")
-    elSafeButtonTxt.innerText = `${gSafeButtonClicks} clicks available`
+    elSafeButtonTxt.innerText = `${gSafeButtonClicks} clicks left`
 }
 
 
-/**
- * 
- * If we enter to this mode:
- * check in [onCellClicked()] if we're in god mode, if we are:
- * go outside from the regular flow
- * create [setMines()] function, save the mines and the position in array(?)
- * keep adding to the array while we're in god moe AND user click on cells
- * add button - set mines, when clicked:
- * call/create(?) [createMines()] func, set the mines based on array items
- * exit god mode, render(how to not render the regulat random mines?) and play
- * 
- * 
- * 
- * TODO: It's working, what's left - consider 
- * 
- * **/
-function onGodModeClicked() {
-    var strHTML = ""
-    console.log("here")
-    gIsGodMode = true
-    restartGame()//TODO: check if godMode when we call randomizeMines()
-    var elGodMose = document.querySelector(".godmode-message")
-    strHTML += `<p class="god-mode-text" >You're in god mode</p>`
-    strHTML += `<button onclick="exitGodMode()">EXIT</button>`
-    strHTML += `<button class="small-m-l" onclick="playYourCreation()">play with your creation</button>`
-    elGodMose.classList.remove("hide")
-    elGodMose.innerHTML = strHTML
-
-}
-
-function createMine(i, j) {
-    console.log("creating...", { i, j })
-
-    var elCell = document.getElementById(`${i},${j}`)
-    if (elCell.innerText === MINE) return //prevent messing with mines cnt
-    elCell.innerText = MINE
-    gGodModeMines.push({ i, j })
-
-    console.log(gGodModeMines)
-}
-
-function exitGodMode() {
-    gIsGodMode = false
-    document.querySelector(".godmode-message").classList.add("hide")
-    restartGame()
-}
-
-function playYourCreation() {
-    // alert("Even for god it took 7 days...")
-    createMines()
-}
-
-function createMines() {
-    console.log("creating mines...", gGodModeMines)
-
-    for (var i = 0; i < gGodModeMines.length; i++) {
-        console.log(gGodModeMines[i])
-        var cell = gBoard[gGodModeMines[i].i][gGodModeMines[i].j]
-        cell.isMine = true
-    }
-
-    //TODO: Extract to function
-    renderBoard()
-    setMinesNegsCount()
-    gLevel.mines = gGodModeMines.length
-    gIsGodMode = false
-    document.querySelector(".godmode-message").classList.add("hide")
-}
 
 
-/**
- * 
- * maybe array of objects...?
- * each object will containt the prev operation ?
- * prev mines/marked(cell?) pos
- * then each click add the obj to arr
- * 
- * 
- * remove expanded cells
- * 
- * 
- * **/
-function undo() {
-    // console.log(gUserOperations)
-    if (!gUserOperations.length || !gGame.isOn) return
-    console.log("undo")
-
-    var lastOperation = gUserOperations[gUserOperations.length - 1]
-    // console.log(lastOperation.expandedCells)
-    undoOperation(lastOperation)
-}
-
-function undoOperation(operation) {
 
 
-    gUserHints = operation.hints
-    console.log("gUserHints", gUserHints)
-    renderHints()
 
-    if (operation.cell.isMine) {
-        console.log("MIVE!!!!!!!!!!!111")
-        gBoard[operation.cell.pos.i][operation.cell.pos.j].isShown = false
-        gUserLives++
-        renderLives()
-        renderBoard()
-        gUserOperations.pop()
-        return
-    }
-
-
-    var expandedCells = operation.expandedCells
-    if (!expandedCells.length) {
-        console.log("not expanded!!!")
-        gBoard[operation.cell.pos.i][operation.cell.pos.j].isShown = false
-        renderBoard()
-        gUserOperations.pop()
-        return
-    }
-
-
-    console.log(expandedCells, "inside unto expanded cells")
-
-    for (var i = 0; i < expandedCells.length; i++) {
-        var row = expandedCells[i].pos.i
-        var col = expandedCells[i].pos.j
-        gBoard[row][col].isShown = false
-        console.log(expandedCells[i].originPos)
-    }
-    gBoard[expandedCells[0].originPos.i][expandedCells[0].originPos.j].isShown = false
-    renderBoard()
-    gUserOperations.pop()
-
-}
-
-function addOperation(cell, pos, hints = gUserHints, lives = gUserLives) {
-
-    console.log(cell.isMine)
-
-    var operation = {}
-    operation.hints = gUserHints
-    operation.lives = gUserLives
-    operation.cell = {
-        minesAroundCount: cell.minesAroundCount,
-        isShown: cell.isShown,
-        isMine: cell.isMine,
-        isMarked: cell.isMarked,
-        pos: { i: pos.i, j: pos.j }
-    },
-        operation.expandedCells = gExpendedCells
-
-
-    gUserOperations.push(operation)
-
-}
 
 
 
