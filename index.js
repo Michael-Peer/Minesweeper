@@ -2,6 +2,8 @@
 
 
 
+
+
 const MINE = "💣"
 const FLAG = "🏁"
 
@@ -455,7 +457,7 @@ function expandShown(board, elCell, i, j) {
 //             if (i === pos.i && j === pos.j) continue
 //             var currCell = gBoard[i][j]
 //             if (!currCell.isMarked) {
-//                 if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
 //                 currCell.isShown = true  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
 //                 console.log(currCell.minesAroundCount, "expandAround")
 //             }
@@ -472,11 +474,12 @@ function expandAround(pos) {
             var currCell = gBoard[i][j]
             if (!currCell.isMarked) {
                 if (!currCell.isShown) {
-                    if(!currCell.isMine) {
-                    currCell.isShown =  true 
-                    if(currCell.minesAroundCount >0) continue
-                    console.log("minadlkdaldakkadadld", currCell.isMine)
-                    expandAround({ i, j })
+                    if (!currCell.isMine) {
+                        if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+                        currCell.isShown = true
+                        if (currCell.minesAroundCount > 0) continue
+                        console.log("minadlkdaldakkadadld", currCell.isMine)
+                        expandAround({ i, j })
                     }
                 }
                 // if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
@@ -626,6 +629,7 @@ function revealNgs(pos) {
             if (i === pos.i && j === pos.j) continue
             var currCell = gBoard[i][j]
             if (!currCell.isMarked) {
+                if (currCell.isShown) continue //prevent hiding already opened cells
                 currCell.isShown = true
                 ngs.push(currCell)
             }
