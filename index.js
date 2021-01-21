@@ -199,14 +199,20 @@ function renderBoard(board) {
             //TODO: Pass data instead of ${i, j} - save code
             if (cell.isMine && cell.isMarked) {
                 strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${FLAG}</td>`
+            } else if (cell.isMine && cell.isShown) {
+                strHTML += `<td id="${i},${j}" class="bomb" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? MINE : ""}</td>`
             }
             else if (cell.isMine) {
-                strHTML += `<td id="${i},${j}" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? MINE : ""}</td>`
+                strHTML += `<td id="${i},${j}"  mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? MINE : ""}</td>`
             }
             else if (cell.isMarked) {
                 strHTML += `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
-            } else {
-                strHTML += `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.isShown ? cell.minesAroundCount : ""}</td>`
+            } else if(cell.isShown) {
+                strHTML += `<td id="${i},${j}" class="expand" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.minesAroundCount > 0 ? cell.minesAroundCount : ""}</td>`
+            }
+            
+            else {
+                strHTML += `<td id="${i},${j}"  onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${cell.isShown ? cell.minesAroundCount : ""}</td>`
             }
         }
         strHTML += `</tr>`
@@ -435,6 +441,10 @@ function expandAround(pos) {
             if (i === pos.i && j === pos.j) continue
             var currCell = gBoard[i][j]
             if (!currCell.isMarked) currCell.isShown = true
+            // if there currCell.mineAround > 0 --> keep expanding
+            // if (currCell.minesAroundCount > 0) {
+            //     expandAround ({i, j})
+            // }
         }
     }
 }
@@ -508,12 +518,16 @@ function renderLives() {
             break;
     }
     var elLives = document.querySelector('.lives');
-    elLives.innerHTML = `<p>${lives} lives</p>`
+    elLives.innerHTML = `<p>${lives} Lives</p>`
 }
 
 function renderSmiley() {
-    var elSmiley = document.querySelector('.smiley');
-    elSmiley.innerText = `${gSmileyState}`
+    var elSmileyL = document.querySelector('.smiley-left');
+    var elSmileyR = document.querySelector('.smiley-right');
+
+    elSmileyL.innerText = `${gSmileyState}`
+    elSmileyR.innerText = `${gSmileyState}`
+
 }
 
 function renderHints() {
@@ -533,7 +547,7 @@ function renderHints() {
             break;
     }
     var elHints = document.querySelector('.hints');
-    elHints.innerHTML = `<p>${hints} hints</p>`
+    elHints.innerHTML = `<p>${hints} Hints</p>`
 }
 
 function onHintClicked() {
@@ -554,7 +568,7 @@ function onHintClicked() {
      * 
      * Logic is done
      * **/
-    if (!gUserHints) return
+    if (!gUserHints || gIsGodMode) return
     gIsHintClicked = true
     renderHintMessage(true)
 }
@@ -642,7 +656,7 @@ function setBestScore() {
 // MINE).
 function onSafeButtonClicked() {
 
-    if (!gSafeButtonClicks || gIsSafeButtonClicked) return //no clicka or already active
+    if (!gSafeButtonClicks || gIsSafeButtonClicked || gIsGodMode) return //no clicka or already active
     console.log("hereweew")
 
     const availableCells = []
@@ -719,6 +733,7 @@ function onGodModeClicked() {
     strHTML += `<button class="small-m-l" onclick="playYourCreation()">play with your creation</button>`
     elGodMose.classList.remove("hide")
     elGodMose.innerHTML = strHTML
+
 }
 
 function createMine(i, j) {
