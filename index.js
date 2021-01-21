@@ -74,7 +74,7 @@ var operation = {
     expandedCells: []
 }
 
-var gPreviousSizeByb = 'easy'
+var gPreviousSizeBtn = ButtonState.EASY
 
 
 
@@ -455,8 +455,8 @@ function expandAround(pos) {
             if (i === pos.i && j === pos.j) continue
             var currCell = gBoard[i][j]
             if (!currCell.isMarked) {
-                currCell.isShown = true
-                gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+                if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+                currCell.isShown = true  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
             }
             // if there currCell.mineAround > 0 --> keep expanding
             // if (currCell.minesAroundCount > 0) {
@@ -503,12 +503,12 @@ function onLevelClicked(size, el) {
 }
 
 function changeBtnClass(el, className) {
-    document.getElementById(gPreviousSizeByb).classList.remove("size-btn")
-    document.getElementById(gPreviousSizeByb).classList.add("small-size-btn")
+    document.getElementById(gPreviousSizeBtn).classList.remove("size-btn")
+    document.getElementById(gPreviousSizeBtn).classList.add("small-size-btn")
     el.classList.add("size-btn")
     el.classList.remove("small-size-btn")
 
-    gPreviousSizeByb = className
+    gPreviousSizeBtn = className
 }
 
 //maybe there is small bug with i,j  - fixed
@@ -829,13 +829,16 @@ function undoOperation(operation) {
 
 
     var expandedCells = operation.expandedCells
-    if(!expandedCells.length) {
+    if (!expandedCells.length) {
         console.log("not expanded!!!")
         gBoard[operation.cell.pos.i][operation.cell.pos.j].isShown = false
         renderBoard()
         gUserOperations.pop()
         return
     }
+
+
+    console.log(expandedCells, "inside unto expanded cells")
 
     for (var i = 0; i < expandedCells.length; i++) {
         var row = expandedCells[i].pos.i
