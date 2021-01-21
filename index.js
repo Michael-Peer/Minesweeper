@@ -130,7 +130,7 @@ function randomizeMines() {
     for (var i = 0; i < gLevel.mines; i++) {
         var rndI = getRandomInt(0, gLevel.size)
         var rngJ = getRandomInt(0, gLevel.size)
-        console.log("before")
+        // console.log("before")
 
         //prevent 2 mines on same spot
         if (!isFirstTimeRuning) {
@@ -147,7 +147,7 @@ function randomizeMines() {
             prevJ = rngJ
         }
 
-        console.log("after")
+        // console.log("after")
 
         var cell = gBoard[rndI][rngJ]
         cell.isMine = true
@@ -447,6 +447,22 @@ function expandShown(board, elCell, i, j) {
 }
 
 //TODO: Think how to merge this and the neg count func, it's basically the same function - maybe a bool that determine the purpose
+// function expandAround(pos) {
+//     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+//         if (i < 0 || i > gBoard.length - 1) continue
+//         for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+//             if (j < 0 || j > gBoard[0].length - 1) continue
+//             if (i === pos.i && j === pos.j) continue
+//             var currCell = gBoard[i][j]
+//             if (!currCell.isMarked) {
+//                 if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+//                 currCell.isShown = true  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
+//                 console.log(currCell.minesAroundCount, "expandAround")
+//             }
+//         }
+//     }
+// }
+
 function expandAround(pos) {
     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
         if (i < 0 || i > gBoard.length - 1) continue
@@ -455,21 +471,18 @@ function expandAround(pos) {
             if (i === pos.i && j === pos.j) continue
             var currCell = gBoard[i][j]
             if (!currCell.isMarked) {
-                if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
-                  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
-
-                if (!currCell.minesAroundCount && !currCell.isShown) {
-                    currCell.isShown = true
-                    console.log(currCell.minesAroundCount, "expandAround")
-                    return expandAround({ i: i, j: j })
+                if (!currCell.isShown) {
+                    if(!currCell.isMine) {
+                    currCell.isShown =  true 
+                    if(currCell.minesAroundCount >0) continue
+                    console.log("minadlkdaldakkadadld", currCell.isMine)
+                    expandAround({ i, j })
+                    }
                 }
+                // if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+                // currCell.isShown = true  // ---> the problem. if I expand and there is already cell shown around it, it'l still add it to gExpendedCells - FIXED
+                // console.log(currCell.minesAroundCount, "expandAround")
             }
-
-
-            // if there currCell.mineAround > 0 --> keep expanding
-            // if (currCell.minesAroundCount > 0) {
-            //     returnexpandAround ({i, j})
-            // }
         }
     }
 }
