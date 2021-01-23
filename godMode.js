@@ -34,10 +34,34 @@ function createMine(i, j) {
 function exitGodMode(shouldRestart) {
     gIsGodMode = false
 
-    renderGodModeButtons()
-    console.log(shouldRestart)
 
-    if (shouldRestart) restartGame()
+    renderGodModeButtons()
+
+    if (shouldRestart) { //init curr level
+
+        var levelEl = getCurrLevelEl()
+        var size
+
+        switch (levelEl.id) {
+            case ButtonState.EASY:
+                size = 4
+                break;
+            case ButtonState.MEDIUM:
+            default:
+                size = 8
+                break;
+            case ButtonState.HARD:
+                size = 12
+                break;
+        }
+
+        onLevelClicked(size, levelEl)
+    }
+}
+
+
+function getCurrLevelEl() {
+    return document.querySelector(".size-btn")
 }
 
 function createMines() {
