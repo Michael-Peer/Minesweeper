@@ -18,6 +18,7 @@ const ButtonState = {
 }
 
 var gBoard
+
 var gLevel = {
     size: 8,
     mines: 12
@@ -28,20 +29,18 @@ var gGame = {
     shownCount: 0,
     markedCount: 0,
     secsPassed: 0
+}
 
-} // will be implemented later, currenty the game perfectly working without it
-
-
-
-var gIsFirstClick
 var gUserLives
 var gUserHints
 var gSmileyState
-var gIsHintClicked
-var gTimerInterval
 var gSafeButtonClicks
-var gIsSafeButtonClicked
 
+var gTimerInterval
+
+var gIsFirstClick
+var gIsHintClicked
+var gIsSafeButtonClicked
 var gIsGodMode = false
 
 var gGodModeMines = []
@@ -51,6 +50,7 @@ var gExpendedCells = []
 var operation = {
     hints: gUserLives,
     lives: gUserLives,
+    safe: gSafeButtonClicks,
     cell: {
         minesAroundCount: 0,
         isShown: false,
@@ -61,12 +61,11 @@ var operation = {
             j: null
         }
     },
+    elCell: null,
     expandedCells: []
 }
 
 var gPreviousSizeBtn = ButtonState.MEDIUM
-
-
 
 //when page loads
 function initGame() {
@@ -102,7 +101,6 @@ function initGame() {
 function renderContent() {
     if (!gIsGodMode) randomizeMines()
     renderBoard()
-    // randomizeMines()
     renderLives()
     renderSmiley()
     renderHints()
@@ -202,7 +200,7 @@ function renderBoard() {
 // clicked
 function onCellClicked(elCell, i, j, e) {
 
-    gExpendedCells = [] // whcih cells expanded - undo impl
+    gExpendedCells = [] // whcih cells expanded init - undo impl
 
     if (!gGame.isOn) return
     console.log(gIsGodMode)
@@ -233,21 +231,38 @@ function onCellClicked(elCell, i, j, e) {
     } else if (cell.isMine && gUserLives) {
         gUserLives--
         !gUserLives ? onMineClicked() : renderLives()
+        gGame.markedCount++
+        elCell.innerText = MINE
+        elCell.classList.add("bomb")
         // renderWarning(i,j) ??
     }
 
     cell.isShown = true
+    if (!cell.isMine) gGame.shownCount++
 
-    if (!cell.minesAroundCount && !cell.isMine) expandShown(gBoard, elCell, i, j) //expanding negs
+
+    if (!cell.minesAroundCount && !cell.isMine) {
+        
+    console.log(elCell)
+
+    elCell.innerText = ""
+    elCell.classList.add("expand")
+
+    expandShown(gBoard, elCell, i, j) //expanding negs
+    } else if(!cell.isMine) {
+        elCell.innerText = `${cell.minesAroundCount > 0 ? cell.minesAroundCount : ""}`
+        elCell.classList.add("expand")
+    }
 
     addOperation(cell, { i, j })
 
-    renderBoard() //TODO: Reduce unnecessary rendering use innerText/html instead
+    // renderBoard() //TODO: Reduce unnecessary rendering use innerText/html instead
     checkGameOver()
 
 }
 
 function onMineClicked() {
+    renderLives()
     renderMessage(false)
     revealAllMines()
 }
@@ -257,7 +272,7 @@ function renderMessage(isWin) {
     gSmileyState = isWin ? SmileyState.Win : SmileyState.Lose
     renderSmiley()
     var elMessage = document.querySelector('.message');
-    elMessage.innerHTML = `<p>${isWin ? `YOU WON with ${gUserLives} ${gUserLives > 1 ? "lives" : "life"} left` : "YOU LOST"}</p>`
+    elMessage.innerHTML = `<p>${isWin ? `YOU WON<br><br> ${gUserLives} ${gUserLives > 1 ? "lives" : "life"} left` : "YOU LOST"}</p>`
     elMessage.style.display = "inline-block"
     gGame.isOn = false
     clearInterval(gTimerInterval)
@@ -279,11 +294,20 @@ function onCellMarked(elCell, i, j, e) {
     if (cell.isShown) return //prevent click on cells
     if (cell.isMarked) {
         cell.isMarked = !cell.isMarked
-        gGame.markedCount--
+        addOperation(cell, { i, j })
+        if (cell.isMine && !gIsFirstClick && gGame.markedCount) { // && gGame.markedCount - when we first mark, then first click and un mark again
+            console.log("cell.isMine", cell.isMine, { i, j })
+            gGame.markedCount--
+        }
+
         elCell.innerHTML = `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" ></td>`
     } else {
         cell.isMarked = true
-        gGame.markedCount++
+        addOperation(cell, { i, j })
+        if (cell.isMine && !gIsFirstClick) {
+            console.log("cell.isMine", cell.isMine, { i, j })
+            gGame.markedCount++
+        }
         elCell.innerHTML = `<td id="${i},${j}" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j},event)" >${FLAG}</td>`
 
     }
@@ -291,33 +315,6 @@ function onCellMarked(elCell, i, j, e) {
 
     // renderBoard()
 }
-
-
-// Game ends when all mines are
-// marked, and all the other cells
-// are shown
-function checkGameOver() {
-    var mines = gLevel.mines
-    var cellCnt = gBoard.length * gBoard.length - mines
-    // console.log("before", cellCnt, mines)
-
-
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard[0].length; j++) {
-            var cell = gBoard[i][j]
-            /**
-             * 
-             * here we're handling the "regular" case where mines are flagged AND the case where mine revealed by losing life.
-             * 
-             * **/
-            if (cell.isMine && (cell.isMarked || cell.isShown)) mines--
-            else if (cell.isShown && !cell.isMine) cellCnt--
-        }
-    }
-    // console.log("after", cellCnt, mines)
-    if (!cellCnt && !mines) renderMessage(true)
-}
-
 
 
 // When user clicks a cell with no
@@ -335,11 +332,13 @@ function checkGameOver() {
 // at the Bonuses section below)
 function expandShown(board, elCell, i, j) {
     // console.log("herevvvv")
-    expandAround({ i, j })
+    expandAround({ i, j }, elCell)
     // renderBoard() //TODO:  render only the relevent cells!!!!
 }
 
-function expandAround(pos) {
+function expandAround(pos, elCell) {
+
+
     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
         if (i < 0 || i > gBoard.length - 1) continue
         for (var j = pos.j - 1; j <= pos.j + 1; j++) {
@@ -350,9 +349,15 @@ function expandAround(pos) {
                 if (!currCell.isShown) {
                     if (!currCell.isMine) {
                         if (!currCell.isShown) gExpendedCells.push({ currCell, pos: { i, j }, originPos: pos })
+                        gGame.shownCount++
                         currCell.isShown = true
                         // var elCell = document.getElementById(`${i},${j}`)
                         // elCell.innerHTML =  `<td id="${i},${j}" class="expand" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this,${i},${j}, event)" >${currCell.minesAroundCount > 0 ? currCell.minesAroundCount : ""}</td>`
+                        var elCell = getIdByPosition({ i, j })
+                        // console.log(elCell)
+                        elCell.innerText = `${currCell.minesAroundCount > 0 ? currCell.minesAroundCount : ""}`
+                        elCell.classList.add("expand")
+
                         if (currCell.minesAroundCount > 0) continue
                         expandAround({ i, j })
                     }
@@ -363,57 +368,12 @@ function expandAround(pos) {
 }
 
 
-function onLevelClicked(size, el) {
-    switch (size) {
-        case 4:
-            gLevel.size = size
-            gLevel.mines = 2
-            restartGame()
 
-            changeBtnClass(el, ButtonState.EASY)
-
-
-            break;
-        case 8:
-            gLevel.size = size
-            gLevel.mines = 12
-            restartGame()
-
-            changeBtnClass(el, ButtonState.MEDIUM)
-
-            break;
-        case 12:
-            gLevel.size = size
-            gLevel.mines = 30
-            restartGame()
-
-            changeBtnClass(el, ButtonState.HARD)
-
-
-            break;
-
-        default:
-            console.log("Well, you have big problem if you ended up here")
-            break;
-    }
-}
-
-function changeBtnClass(el, className) {
-    document.getElementById(gPreviousSizeBtn).classList.remove("size-btn")
-    document.getElementById(gPreviousSizeBtn).classList.add("small-size-btn")
-    el.classList.add("size-btn")
-    el.classList.remove("small-size-btn")
-
-    gPreviousSizeBtn = className
-}
-
-//maybe there is small bug with i,j  - fixed
-function changeMineLocation(elCell, i, j) {
-    randomizeMine({ i, j })
-    gBoard[i][j].isMine = false
-    setMinesNegsCount()
-}
-
+/**
+ * 
+ * Lives
+ * 
+ * **/
 function renderLives() {
     var lives = ""
     switch (gUserLives) {
@@ -434,54 +394,44 @@ function renderLives() {
     elLives.innerHTML = `<p>${lives} Lives</p>`
 }
 
-function renderSmiley() {
-    var elSmileyL = document.querySelector('.smiley-left');
-    var elSmileyR = document.querySelector('.smiley-right');
-
-    elSmileyL.innerText = `${gSmileyState}`
-    elSmileyR.innerText = `${gSmileyState}`
-
-}
-
-function renderHints() {
-    var hints = ""
-    switch (gUserHints) {
-        case 3:
-            hints = " 💡 💡 💡 "
-            break;
-        case 2:
-            hints = " 💡 💡 "
-
-            break;
-        case 1:
-            hints = " 💡 "
-            break;
-        default:
-            break;
-    }
-
-    var elHints = document.querySelector('.hints');
-    elHints.innerHTML = `<p>Hints ${hints}</p>`
-}
-
-function onHintClicked() {
-
-    if (!gUserHints || gIsGodMode || !gGame.isOn) return
-    if (!gIsHintClicked) {
-        var elBulb = document.querySelector(".bulb-indication")
-        elBulb.style.display = "inline-block"
-        gUserHints--
-        renderHints()
-    }
-    gIsHintClicked = true
-}
 
 
-function startTimer() {
-    var elTimer = document.querySelector(".timer")
-    gGame.secsPassed++
-    elTimer.innerText = gGame.secsPassed
+/**
+ * 
+ * Game conditions
+ * 
+ * **/
 
+
+// Game ends when all mines are
+// marked, and all the other cells
+// are shown
+function checkGameOver() {
+    var mines = gLevel.mines //should be equal to marked count
+    var cellCnt = gBoard.length * gBoard.length - mines //should be equal to shown count
+    // console.log("before", cellCnt, mines)
+
+    console.log(gGame.shownCount, "gGame.shownCount")
+    console.log(gGame.markedCount, "gGame.markedCount")
+    console.log(gUserLives, "gUserLives")
+
+    if (cellCnt === gGame.shownCount && mines === gGame.markedCount) renderMessage(true)
+
+
+    // for (var i = 0; i < gBoard.length; i++) {
+    //     for (var j = 0; j < gBoard[0].length; j++) {
+    //         var cell = gBoard[i][j]
+    //         /**
+    //          * 
+    //          * here we're handling the "regular" case where mines are flagged AND the case where mine revealed by losing life.
+    //          * 
+    //          * **/
+    //         if (cell.isMine && (cell.isMarked || cell.isShown)) mines--
+    //         else if (cell.isShown && !cell.isMine) cellCnt--
+    //     }
+    // }
+    // // console.log("after", cellCnt, mines)
+    // if (!cellCnt && !mines) renderMessage(true)
 }
 
 
@@ -494,11 +444,37 @@ function restartGame() {
     document.querySelector(".message").innerText = ""
 }
 
+function renderSmiley() {
+    var elSmileyL = document.querySelector('.smiley-left');
+    var elSmileyR = document.querySelector('.smiley-right');
+
+    elSmileyL.innerText = `${gSmileyState}`
+    elSmileyR.innerText = `${gSmileyState}`
+
+}
+
+/**
+ * 
+ * Timer
+ * 
+ * **/
+
+function startTimer() {
+    var elTimer = document.querySelector(".timer")
+    gGame.secsPassed++
+    elTimer.innerText = gGame.secsPassed
+}
+
 function renderStartingSecs() {
     var elTimer = document.querySelector(".timer")
     elTimer.innerText = 0
 }
 
+/**
+ * 
+ * Local storage
+ * 
+ * **/
 
 //local storage
 function storeScore() {
@@ -506,7 +482,6 @@ function storeScore() {
     if (!bestScore || gGame.secsPassed < bestScore) {
         localStorage.setItem("bestScore", `${gGame.secsPassed}`)
         renderBestScore(gGame.secsPassed)
-
     }
 }
 
@@ -522,57 +497,61 @@ function setBestScore() {
     if (bestScore) renderBestScore(bestScore)
 }
 
+/**
+ * 
+ * Level settings
+ * 
+ * **/
 
-// Clicking the Safe-Click button will mark a random covered cell
-// (for a few seconds) that is safe to click (does not contain a
-// MINE).
-function onSafeButtonClicked() {
+function onLevelClicked(size, el) {
+    switch (size) {
+        case 4:
 
-    if (!gSafeButtonClicks || gIsSafeButtonClicked || gIsGodMode) return //no clicka or already active
-    console.log("hereweew")
+            setLevelAndRestart(size, 2)
+            changeBtnClass(el, ButtonState.EASY)
 
-    const availableCells = []
+            break;
 
-    gIsSafeButtonClicked = true
+        case 8:
 
-    var elCell = null
+            setLevelAndRestart(size, 12)
+            changeBtnClass(el, ButtonState.MEDIUM)
 
-    //random cells
-    for (var i = 0; i < gLevel.size; i++) {
-        for (var j = 0; j < gLevel.size; j++) {
-            var cell = gBoard[i][j]
-            if (!cell.isMine && !cell.isShown && !cell.isMarked) {
-                availableCells.push({ pos: { i, j } })
-            }
-        }
+            break;
+
+        case 12:
+
+            setLevelAndRestart(size, 30)
+            changeBtnClass(el, ButtonState.HARD)
+
+            break;
+
+        default:
+
+            setLevelAndRestart(size, 12)
+            changeBtnClass(el, ButtonState.MEDIUM)
+
+            break;
     }
-
-    //no cells
-    if (!availableCells.length) {
-        gIsSafeButtonClicked = false
-        return
-    }
-
-    var cell = availableCells[getRandomInt(0, availableCells.length)]
-
-    console.log(gBoard[cell.pos.i][cell.pos.j], "safe click")
-    elCell = document.getElementById(`${cell.pos.i},${cell.pos.j}`)
-    elCell.classList.add("safe")
-
-    gSafeButtonClicks--
-    renderAvailableClicks()
-
-    setTimeout(() => {
-        elCell.classList.remove("safe")
-        gIsSafeButtonClicked = false
-    }, 5000);
-
 }
 
-function renderAvailableClicks() {
-    var elSafeButtonTxt = document.querySelector(".safe-button-text")
-    elSafeButtonTxt.innerText = `${gSafeButtonClicks} clicks left`
+function setLevelAndRestart(size, mines) {
+    gLevel.size = size,
+        gLevel.mines = mines
+    restartGame()
 }
+
+function changeBtnClass(el, className) {
+
+    document.getElementById(gPreviousSizeBtn).classList.remove("size-btn")
+    document.getElementById(gPreviousSizeBtn).classList.add("small-size-btn")
+    el.classList.add("size-btn")
+    el.classList.remove("small-size-btn")
+
+    gPreviousSizeBtn = className
+}
+
+
 
 
 

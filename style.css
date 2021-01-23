@@ -117,11 +117,11 @@ body {
 }
 
 .undo {
+  cursor: pointer;
   position: absolute;
-  right: 100px;
   left: 50px;
   top: 130px;
-  font-size: 36px;
+  font-size: 60px;
 }
 
 .smiley-left {
@@ -150,11 +150,11 @@ body {
 
 
 .smiley-right:hover {
-  font-size: 90px;
+  font-size: 70px;
 }
 
 .smiley-left:hover {
-  font-size: 90px;
+  font-size: 70px;
 }
 
 .bomb {
@@ -200,6 +200,7 @@ body {
   font-size: 20px;
   padding: 10px 20px 10px 20px;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .btn:hover {

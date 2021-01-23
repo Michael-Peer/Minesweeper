@@ -2,31 +2,29 @@
 
 //random mines location on board
 function randomizeMines() {
-    var prevI
-    var prevJ
-    var isFirstTimeRuning = true
+
     for (var i = 0; i < gLevel.mines; i++) {
+
         var rndI = getRandomInt(0, gLevel.size)
         var rngJ = getRandomInt(0, gLevel.size)
+        var isMine = gBoard[rndI][rngJ].isMine
 
         //prevent 2 mines on same spot
-        if (!isFirstTimeRuning) {
-            while (rndI === prevI && rngJ == prevJ) {
-                rndI = getRandomInt(0, gLevel.size)
-                rngJ = getRandomInt(0, gLevel.size)
-                console.log("in while")
-            }
-            prevI = rndI
-            prevJ = rngJ
-        } else {
-            isFirstTimeRuning = false
-            prevI = rndI
-            prevJ = rngJ
+        while (isMine) {
+            rndI = getRandomInt(0, gLevel.size)
+            rngJ = getRandomInt(0, gLevel.size)
+            isMine = gBoard[rndI][rngJ].isMine
         }
 
         var cell = gBoard[rndI][rngJ]
+        console.log({ rndI, rngJ })
         cell.isMine = true
     }
+
+
+
+    console.log(gBoard)
+
 }
 
 //random Single mine location on board(run if first click is mine)
@@ -43,6 +41,7 @@ function randomizeMine(pos) {
         cell = gBoard[rndI][rngJ]
         if (!cell.isMine) isMine = false
     }
+
     cell.isMine = true
 }
 
@@ -60,7 +59,7 @@ function setMinesNegsCount(board) {
 
             var cellNegsCnt = countNegs({ i, j })
             cell.minesAroundCount = cellNegsCnt
-            
+
         }
     }
     // renderBoard()
@@ -90,11 +89,13 @@ function revealAllMines() {
         for (var j = 0; j < gBoard[0].length; j++) {
             var cell = gBoard[i][j]
             if (cell.isMine) {
+                console.log(cell.isMine)
                 cell.isMarked = false
                 cell.isShown = true
                 var elCell = document.getElementById(`${i},${j}`)
                 console.log("Revelaing...")
-                elCell.innerHTML = `<td id="${i},${j}" class="bomb" mouseup="mouseUp()" onclick="onCellClicked(this,${i},${j}, event)" oncontextmenu="onCellMarked(this, ${i},${j},event)"  >${cell.isShown ? MINE : ""}</td>`
+                elCell.innerText = MINE
+                elCell.classList.add("bomb")
             }
         }
     }
@@ -102,3 +103,10 @@ function revealAllMines() {
     // renderBoard() //TODO: Reduce unnecessary rendering
 }
 
+
+//change location on first click if it's a mine
+function changeMineLocation(elCell, i, j) {
+    randomizeMine({ i, j })
+    gBoard[i][j].isMine = false
+    setMinesNegsCount()
+}

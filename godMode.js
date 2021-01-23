@@ -1,16 +1,22 @@
+'use strict'
 
 function onGodModeClicked() {
     var strHTML = ""
     console.log("here")
+    renderGodModeButtons()
     gIsGodMode = true
     restartGame()
+
+}
+
+function renderGodModeButtons() {
+
+    if (gIsGodMode) return //prevent double click and toogle on main button
     var elGodModeP = document.querySelector(".play")
     var elGodModeE = document.querySelector(".exit")
 
-    elGodModeP.classList.remove("hide")
-    elGodModeE.classList.remove("hide")
-
-
+    elGodModeP.classList.toggle("hide")
+    elGodModeE.classList.toggle("hide")
 }
 
 function createMine(i, j) {
@@ -19,22 +25,20 @@ function createMine(i, j) {
     var elCell = document.getElementById(`${i},${j}`)
     if (elCell.innerText === MINE) return //prevent messing with mines cnt
     elCell.innerText = MINE
+    // elCell.classList.add("bomb")
     gGodModeMines.push({ i, j })
 
     console.log(gGodModeMines)
 }
 
-function exitGodMode() {
+function exitGodMode(shouldRestart) {
     gIsGodMode = false
-    var elGodModeP = document.querySelector(".play")
-    var elGodModeE = document.querySelector(".exit")
 
-    elGodModeP.classList.add("hide")
-    elGodModeE.classList.add("hide")
-    restartGame()
+    renderGodModeButtons()
+    console.log(shouldRestart)
+
+    if (shouldRestart) restartGame()
 }
-
-
 
 function createMines() {
     console.log("creating mines...", gGodModeMines)
@@ -45,10 +49,13 @@ function createMines() {
         cell.isMine = true
     }
 
-    //TODO: Extract to function
+    initGodModeGame()
+}
+
+function initGodModeGame() {
     renderBoard()
     setMinesNegsCount()
     gLevel.mines = gGodModeMines.length
-    gIsGodMode = false
+    exitGodMode(false)
     // document.querySelector(".godmode-message").classList.add("hide")
 }
